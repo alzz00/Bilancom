@@ -6,6 +6,7 @@ asgari ödemeler ve net birikim. iPhone'da ana ekrana eklenip uygulama gibi kull
 - **Veriler yalnızca telefonda saklanır.** Hiçbir sunucuya gönderilmez; Claude'da da bilgisayarda da durmaz.
 - Altın ve döviz fiyatları `finans.truncgil.com` adresinden çekilir (alış fiyatı). Bu isteğe kişisel veri eklenmez.
 - İnternet yokken de açılır; fiyatlar son alınan haliyle kalır.
+- Görünüm: **Koyu** (gece mavisi ve altın, varsayılan), **Açık** ya da **Otomatik** (telefonun ayarını izler); Ayarlar'dan seçilir.
 - Ana ekrandaki simge silinirse veriler de silinir. **Ayarlar → Yedek al** ile düzenli yedek al
   (Dosyalar/iCloud'a kaydet). Geri yüklemek için **Ayarlar → Yedekten geri yükle**.
 

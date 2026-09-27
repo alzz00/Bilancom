@@ -90,7 +90,7 @@ function draw(size) {
   const buf = Buffer.alloc(size * size * 4);
   const scale = (size * 0.6) / 18; // glyph spans x 3..21
   const ox = size / 2 - 12 * scale, oy = size / 2 - 12.4 * scale;
-  const top = [0x1D, 0x74, 0xBF], bottom = [0x11, 0x57, 0x94], ink = [0xF6, 0xF8, 0xFC];
+  const top = [0x1E, 0x2E, 0x52], bottom = [0x0A, 0x11, 0x20], ink = [0xEE, 0xC8, 0x78];
   for (let py = 0; py < size; py++) {
     const t = py / (size - 1);
     for (let px = 0; px < size; px++) {

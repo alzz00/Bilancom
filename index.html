@@ -5,78 +5,106 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hesap Defterim</title>
 <meta name="description" content="Varlıklarını, borçlarını ve birikimini tutan kişisel defter. Veriler yalnızca bu cihazda saklanır.">
-<meta name="theme-color" content="#EDF1EE" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0F1413" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0A1120" id="themeColor">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Defterim">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="ikonlar/ikon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="ikonlar/ikon-192.png">
+<script>
+// Apply the saved look before the first paint, so the screen never flashes the other theme.
+(function () {
+  var t = 'koyu';
+  try { t = localStorage.getItem('hd.tema') || 'koyu'; } catch (e) { /* default */ }
+  if (t === 'oto') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'acik' : 'koyu';
+  document.documentElement.setAttribute('data-tema', t === 'acik' ? 'acik' : 'koyu');
+})();
+</script>
 <style>
+/* Gece: navy and gold, the default look. */
 :root {
-  --bg: #EDF1EE;
-  --surface: #FAFBFA;
-  --surface-2: #E4E9E6;
-  --ink: #18202B;
-  --ink-2: #485361;
-  --ink-3: #5E6975;
-  --line: #DAE0DC;
-  --accent: #1666AA;
-  --accent-ink: #F6F8FC;
-  --accent-soft: #DCE8F4;
-  --debt: #BE4932;
-  --debt-soft: #F6E1DB;
-  --good: #1E6B3A;
-  --good-soft: #DDEFE2;
-  --warn: #7F5600;
-  --warn-soft: #F8EACB;
-  --crit: #A3302A;
-  --crit-soft: #F7DEDB;
-  --crit-ink: #FFF8F7;
-  --scrim: rgba(16, 22, 30, .45);
-  --shadow: 0 1px 2px rgba(24, 32, 43, .05), 0 10px 28px -16px rgba(24, 32, 43, .2);
-  --fab-shadow: 0 12px 26px -10px rgba(22, 102, 170, .6);
+  --bg: #0A1120;
+  --surface: #111A2C;
+  --surface-2: #1A253B;
+  --ink: #EEF2F8;
+  --ink-2: #B7C1D4;
+  --ink-3: #8C98B0;
+  --line: #23314B;
+  --accent: #E6BC62;
+  --accent-ink: #1A1405;
+  --accent-soft: #2B2515;
+  --accent-text: #E6BC62;
+  --gold: linear-gradient(150deg, #F2D08A, #C99A3E);
+  --gold-bar: linear-gradient(90deg, #C99A3E, #F2D08A);
+  --debt: #EB6F8E;
+  --debt-soft: #3A1E2A;
+  --good: #7ED9A0;
+  --good-soft: #143020;
+  --warn: #F2C66B;
+  --warn-soft: #32290F;
+  --crit: #F58C86;
+  --crit-soft: #3B1D22;
+  --crit-ink: #1A0B0A;
+  --card-bg: linear-gradient(180deg, #131D32, #0F1728);
+  --page-glow: radial-gradient(900px 520px at 15% -8%, #1A2848 0%, rgba(10, 17, 32, 0) 62%);
+  --ico-bg: #1C2740;
+  --banner-bg: #2A2412;
+  --pill-bg: #3A3218;
+  --pill-ink: #F2D08A;
+  --scrim: rgba(0, 0, 0, .6);
+  --shadow: 0 24px 48px -28px rgba(0, 0, 0, .9);
+  --fab-shadow: 0 14px 30px -12px rgba(230, 188, 98, .5);
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
   --font-display: ui-rounded, "SF Pro Rounded", -apple-system, "Segoe UI Variable Display", "Segoe UI", Roboto, system-ui, sans-serif;
+  color-scheme: dark;
+}
+/* Gündüz: the same identity on a light page; the net-worth card stays navy. */
+:root[data-tema="acik"] {
+  --bg: #F2F4F8;
+  --surface: #FFFFFF;
+  --surface-2: #ECEFF4;
+  --ink: #121A2C;
+  --ink-2: #46506A;
+  --ink-3: #626C84;
+  --line: #E1E5EC;
+  --accent: #B8892F;
+  --accent-ink: #1A1405;
+  --accent-soft: #F6EDD8;
+  --accent-text: #8A6415;
+  --gold: linear-gradient(150deg, #E9C579, #B8892F);
+  --gold-bar: linear-gradient(90deg, #B8892F, #D9AD55);
+  --debt: #CF4461;
+  --debt-soft: #FBE3E8;
+  --good: #1E7A45;
+  --good-soft: #DCF1E4;
+  --warn: #7F5600;
+  --warn-soft: #FBEBC8;
+  --crit: #B3312F;
+  --crit-soft: #F9DEDC;
+  --crit-ink: #FFF8F7;
+  --card-bg: #FFFFFF;
+  --page-glow: none;
+  --ico-bg: #F6EDD8;
+  --banner-bg: #FBF1DC;
+  --pill-bg: #FFFFFF;
+  --pill-ink: #8A6415;
+  --scrim: rgba(16, 22, 30, .45);
+  --shadow: 0 1px 2px rgba(18, 26, 44, .05), 0 12px 30px -18px rgba(18, 26, 44, .25);
+  --fab-shadow: 0 14px 30px -12px rgba(184, 137, 47, .55);
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0F1413;
-    --surface: #171E1B;
-    --surface-2: #212A27;
-    --ink: #E4EAE7;
-    --ink-2: #AEB9B4;
-    --ink-3: #8C9892;
-    --line: #28312E;
-    --accent: #4E90D2;
-    --accent-ink: #0E1420;
-    --accent-soft: #1B2B3D;
-    --debt: #D3694F;
-    --debt-soft: #3A2520;
-    --good: #72C98E;
-    --good-soft: #193223;
-    --warn: #EDC063;
-    --warn-soft: #35290F;
-    --crit: #F08F86;
-    --crit-soft: #3C201E;
-    --crit-ink: #1A0B0A;
-    --scrim: rgba(0, 0, 0, .6);
-    --shadow: 0 1px 2px rgba(0, 0, 0, .3);
-    --fab-shadow: 0 12px 26px -12px rgba(0, 0, 0, .7);
-    color-scheme: dark;
-  }
-}
+/* With the translucent iPhone status bar, the light page keeps a navy strip behind the clock. */
+:root[data-tema="acik"] body::before { content: ""; position: fixed; z-index: 100; top: 0; left: 0; right: 0; height: env(safe-area-inset-top, 0px); background: #0A1120; }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: var(--bg); }
 html.locked { overflow: hidden; }
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--page-glow), var(--bg);
   color: var(--ink);
   font-family: var(--font-ui);
   font-size: 16px;
@@ -97,7 +125,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 /* header */
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.brand-mark { width: 44px; height: 44px; border-radius: 14px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; flex: none; }
+.brand-mark { width: 44px; height: 44px; border-radius: 14px; background: var(--gold); color: var(--accent-ink); display: grid; place-items: center; flex: none; }
 .brand-name { font-family: var(--font-display); font-weight: 700; font-size: 21px; line-height: 1.1; letter-spacing: -.01em; }
 .brand-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-top: 3px; font-size: 14px; color: var(--ink-3); }
 .sync { display: inline-flex; align-items: center; gap: 6px; }
@@ -105,23 +133,23 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .sync-dot.ok { background: var(--good); }
 .sync-dot.busy { background: var(--warn); }
 .top-btns { display: flex; gap: 8px; }
-.icon-btn { width: 46px; height: 46px; flex: none; border: 0; border-radius: 14px; background: var(--surface); color: var(--ink-2); display: grid; place-items: center; box-shadow: var(--shadow); }
-.icon-btn.flat { background: var(--surface-2); box-shadow: none; width: 42px; height: 42px; border-radius: 12px; }
+.icon-btn { width: 46px; height: 46px; flex: none; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink-2); display: grid; place-items: center; }
+.icon-btn.flat { background: var(--surface-2); border: 0; width: 42px; height: 42px; border-radius: 12px; }
 
 /* tabs: bottom bar on phones, segmented control on wide screens */
 .tabs { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; display: flex; gap: 4px; background: var(--surface); border-top: 1px solid var(--line); padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); -webkit-user-select: none; user-select: none; }
 .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; border: 0; border-radius: 14px; background: none; color: var(--ink-3); font-size: 13px; font-weight: 650; line-height: 1.1; }
 .tab-ico { width: 58px; height: 30px; border-radius: 999px; display: grid; place-items: center; transition: background-color .2s; }
-.tab[aria-current="page"] { color: var(--accent); }
+.tab[aria-current="page"] { color: var(--accent-text); }
 .tab[aria-current="page"] .tab-ico { background: var(--accent-soft); }
-.tab-add { color: var(--accent); }
-.tab-add .tab-ico { width: 48px; background: var(--accent); color: var(--accent-ink); }
+.tab-add { color: var(--accent-text); }
+.tab-add .tab-ico { width: 48px; background: var(--gold); color: var(--accent-ink); }
 @media (min-width: 760px) {
   .tabs { position: static; width: max-content; margin: 22px auto 0; padding: 5px; border: 0; border-radius: 999px; background: var(--surface-2); }
   .tab { flex: none; flex-direction: row; gap: 8px; min-height: 42px; padding: 0 18px 0 12px; border-radius: 999px; font-size: 15.5px; color: var(--ink-2); }
   .tab-ico { width: auto; height: auto; }
   .tab[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
-  .tab[aria-current="page"] .tab-ico { background: none; color: var(--accent); }
+  .tab[aria-current="page"] .tab-ico { background: none; color: var(--accent-text); }
   .tab-add { display: none; }
 }
 
@@ -129,9 +157,9 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 @media (min-width: 760px) { .view { margin-top: 22px; } }
 
 /* banner */
-.banner { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 12px; margin-top: 16px; padding: 12px 14px; border-radius: 16px; background: var(--warn-soft); font-size: 15px; line-height: 1.4; }
+.banner { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 12px; margin-top: 16px; padding: 12px 14px; border-radius: 16px; background: var(--banner-bg); font-size: 15px; line-height: 1.4; }
 .banner p { margin: 0; flex: 1 1 220px; }
-.pill { font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 6px 10px; border-radius: 999px; background: var(--surface); color: var(--warn); }
+.pill { font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 6px 10px; border-radius: 999px; background: var(--pill-bg); color: var(--pill-ink); }
 
 /* buttons */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 50px; padding: 0 20px; border: 0; border-radius: 14px; font-size: 16px; font-weight: 650; white-space: nowrap; }
@@ -146,7 +174,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .btn[disabled] { opacity: .6; cursor: default; }
 
 /* cards */
-.card { background: var(--surface); border-radius: 22px; padding: 20px; box-shadow: var(--shadow); }
+.card { background: var(--card-bg); border: 1px solid var(--line); border-radius: 22px; padding: 20px; box-shadow: var(--shadow); }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .card-title { margin: 0; font-family: var(--font-display); font-weight: 650; font-size: 19px; letter-spacing: -.005em; text-wrap: balance; }
 .card-note { font-size: 14px; color: var(--ink-3); }
@@ -158,11 +186,22 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 }
 
 /* hero */
-.hero { display: grid; gap: 24px; padding: 22px 20px; }
+/* The net-worth card is a navy "bank card" in both themes, so it carries the night palette itself. */
+.hero {
+  --ink: #EEF2F8; --ink-2: #B7C1D4; --ink-3: #8C98B0;
+  --accent: #E6BC62; --accent-text: #E6BC62; --gold-bar: linear-gradient(90deg, #C99A3E, #F2D08A);
+  --debt: #EB6F8E; --good: #7ED9A0; --crit: #F58C86; --crit-soft: #3B1D22;
+  position: relative; overflow: hidden; display: grid; gap: 24px; padding: 22px 20px;
+  color: var(--ink); border-color: #30416A;
+  background: linear-gradient(150deg, #1E2E52 0%, #121C33 55%, #0D1526 100%);
+}
+.hero::before { content: ""; position: absolute; right: -80px; top: -90px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, rgba(230, 188, 98, .22), rgba(230, 188, 98, 0) 70%); pointer-events: none; }
+.hero > * { position: relative; }
 @media (min-width: 880px) { .hero { grid-template-columns: 1.15fr 1fr; align-items: center; gap: 44px; padding: 28px 32px; } }
 .hero-label { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 16px; font-weight: 600; color: var(--ink-2); }
-.hero-num { display: inline-flex; align-items: baseline; gap: 3px; max-width: 100%; margin-top: 6px; padding-bottom: 6px; border-bottom: 4px double var(--ink-3); font-size: clamp(40px, 12vw, 64px); font-weight: 650; line-height: 1.05; letter-spacing: -.025em; overflow-wrap: anywhere; }
-.hero-num .cur, .sum-big .cur { font-size: .55em; font-weight: 600; color: var(--ink-2); letter-spacing: 0; }
+.hero-num { display: inline-flex; align-items: baseline; gap: 3px; max-width: 100%; margin-top: 6px; padding-bottom: 6px; border-bottom: 4px double rgba(230, 188, 98, .75); font-size: clamp(40px, 12vw, 64px); font-weight: 650; line-height: 1.05; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.hero-num .cur, .sum-big .cur { font-size: .55em; font-weight: 600; color: var(--accent-text); letter-spacing: 0; }
+.hero-label { color: #D9C18C; }
 .delta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 12px; font-size: 15px; font-weight: 650; }
 .delta svg.i { width: 18px; height: 18px; stroke-width: 2.2; }
 .delta.up { color: var(--good); }
@@ -174,7 +213,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .cmp-name small { font-size: 13.5px; font-weight: 500; color: var(--ink-3); }
 .cmp-val { font-size: 17px; font-weight: 650; }
 .key { width: 10px; height: 10px; border-radius: 3px; flex: none; }
-.key.asset, .bar.asset, .dbar { background: var(--accent); }
+.key.asset, .bar.asset, .dbar { background: var(--gold-bar); }
 .key.debt, .bar.debt { background: var(--debt); }
 .bar, .dbar { height: 12px; min-width: 3px; border-radius: 0 4px 4px 0; transition: width .5s cubic-bezier(.2, .7, .2, 1); }
 .dbar { height: 10px; }
@@ -192,7 +231,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .pay-big { font-size: 30px; font-weight: 650; letter-spacing: -.02em; line-height: 1.1; }
 .pay-cap { font-size: 14.5px; color: var(--ink-3); }
 .meter { height: 10px; margin: 12px 0 7px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
-.meter > div { height: 100%; border-radius: 999px; background: var(--accent); transition: width .5s; }
+.meter > div { height: 100%; border-radius: 999px; background: var(--gold-bar); transition: width .5s; }
 .plist, .dlist, .rows, .mkt, .set-list { list-style: none; margin: 0; padding: 0; }
 .plist { margin-top: 10px; }
 .prow { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
@@ -215,7 +254,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .dname { flex: 1; min-width: 0; font-size: 15.5px; font-weight: 600; }
 .dval { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .dpct { width: 44px; text-align: right; font-size: 14px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
-.mini-ico { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 10px; background: var(--accent-soft); color: var(--accent); }
+.mini-ico { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 10px; background: var(--ico-bg); color: var(--accent-text); }
 .mini-ico svg.i { width: 18px; height: 18px; }
 
 /* market prices */
@@ -266,7 +305,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .rows-card { padding-block: 6px; }
 .row { width: 100%; min-height: 70px; display: flex; align-items: center; gap: 14px; padding: 13px 0; border: 0; border-top: 1px solid var(--line); background: none; text-align: left; }
 .rows > li:first-child > .row { border-top: 0; }
-.ico { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 14px; background: var(--accent-soft); color: var(--accent); }
+.ico { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 14px; background: var(--ico-bg); color: var(--accent-text); }
 .ico.debt { background: var(--debt-soft); color: var(--debt); }
 .ico svg.i { width: 22px; height: 22px; }
 .rmain { flex: 1; min-width: 0; }
@@ -331,10 +370,14 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .opt svg.i { width: 19px; height: 19px; }
 .opt .badge { color: var(--ink-3); font-weight: 650; }
 .opt[aria-checked="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
-.opt[aria-checked="true"] svg.i { color: var(--accent); }
+.opt[aria-checked="true"] svg.i { color: var(--accent-text); }
 .seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface-2); max-width: 100%; }
 .seg button { height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: none; color: var(--ink-2); font-size: 15px; font-weight: 650; }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.theme-field { margin-top: 12px; }
+.theme-field .seg { display: flex; width: 100%; }
+.theme-field .seg button { flex: 1; }
+:root:not([data-tema="acik"]) .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); box-shadow: none; }
 .err { margin-top: 14px; font-size: 14.5px; font-weight: 600; color: var(--crit); }
 .err:empty { display: none; }
 .sheet-actions { display: grid; gap: 10px; margin-top: 24px; }
@@ -357,7 +400,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .set-row.danger strong { color: var(--crit); }
 .set-row.danger .ico { background: var(--crit-soft); color: var(--crit); }
 .note-box { display: flex; gap: 12px; margin-top: 16px; padding: 14px; border-radius: 16px; background: var(--surface-2); font-size: 14.5px; color: var(--ink-2); }
-.note-box svg.i { color: var(--accent); }
+.note-box svg.i { color: var(--accent-text); }
 
 /* new version notice */
 .update-bar { position: fixed; z-index: 85; left: 50%; top: calc(10px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); display: flex; align-items: center; gap: 14px; width: max-content; max-width: calc(100% - 32px); padding: 8px 8px 8px 16px; border-radius: 16px; background: var(--ink); color: var(--bg); box-shadow: 0 12px 30px -12px rgba(0, 0, 0, .45); font-size: 15px; font-weight: 650; animation: rise .24s cubic-bezier(.2, .8, .2, 1); }
@@ -374,7 +417,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .steps { list-style: none; margin: 22px 0 18px; padding: 0; display: grid; gap: 12px; }
 .steps li { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 18px; background: var(--surface); box-shadow: var(--shadow); font-size: 16px; }
 .steps b { font-weight: 700; }
-.step-ico { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 13px; background: var(--accent-soft); color: var(--accent); }
+.step-ico { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 13px; background: var(--ico-bg); color: var(--accent-text); }
 
 .loading { padding: 64px 0; text-align: center; font-size: 16px; color: var(--ink-3); }
 @media (prefers-reduced-motion: reduce) {
@@ -573,7 +616,7 @@ const fxOf = code => FX.find(f => f.code === code) || null;
 const goldOf = code => GOLD.find(g => g.code === code) || null;
 const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
 
-const APP_VERSION = '2026.09.27-0427';
+const APP_VERSION = '2026.09.27-0521';
 const KEY = 'hd.defter.v1';
 const PKEY = 'hd.fiyat.v1';
 const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
@@ -1648,6 +1691,10 @@ function openSettings() {
   const row = (ic, title, sub, onclick, extra) => h('li', null, h('button', { class: 'set-row' + (extra || ''), type: 'button', onclick },
     h('span', { class: 'ico' }, icon(ic)), h('span', null, h('strong', null, title), sub ? h('span', { class: 's' }, sub) : null)));
   openSheet('Ayarlar', h('div', null,
+    h('div', { class: 'field theme-field' },
+      h('div', { class: 'lbl' }, 'Görünüm'),
+      segmented([{ id: 'koyu', label: 'Koyu' }, { id: 'acik', label: 'Açık' }, { id: 'oto', label: 'Otomatik' }], themePref(), setThemePref),
+      h('div', { class: 'hint' }, 'Otomatik: telefonun gece/gündüz ayarını izler.')),
     h('ul', { class: 'set-list' },
       row('download', 'Yedek al', `${last}. Dosyalar’a ya da iCloud’a kaydet.`, backup),
       row('upload', 'Yedekten geri yükle', 'Daha önce aldığın yedek dosyasını seç.', restorePick),
@@ -1722,6 +1769,25 @@ function confirmWipe() {
       h('button', { class: 'btn ghost block', type: 'button', onclick: () => closeSheet() }, 'Vazgeç'))));
 }
 
+/* ---------- theme ---------- */
+const THEME_KEY = 'hd.tema';
+const lightQuery = window.matchMedia ? matchMedia('(prefers-color-scheme: light)') : null;
+function themePref() {
+  try { const t = localStorage.getItem(THEME_KEY); return t === 'acik' || t === 'oto' ? t : 'koyu'; } catch (e) { return 'koyu'; }
+}
+function applyTheme() {
+  const pref = themePref();
+  const t = pref === 'oto' ? (lightQuery && lightQuery.matches ? 'acik' : 'koyu') : pref;
+  document.documentElement.setAttribute('data-tema', t);
+  const meta = $('#themeColor');
+  if (meta) meta.setAttribute('content', t === 'acik' ? '#F2F4F8' : '#0A1120');
+}
+function setThemePref(v) {
+  try { localStorage.setItem(THEME_KEY, v); } catch (e) { /* this visit only */ }
+  applyTheme();
+  render();
+}
+
 /* ---------- toast ---------- */
 let toastTimer = null;
 function toast(msg) {
@@ -1772,6 +1838,9 @@ function wire() {
   let rt = null;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (S.tab === 'ozet') drawChartSoon(); }, 120); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { render(); refreshPrices(false); } });
+  if (lightQuery && lightQuery.addEventListener) {
+    lightQuery.addEventListener('change', () => { if (themePref() === 'oto') { applyTheme(); render(); } });
+  }
   window.addEventListener('online', () => refreshPrices(false));
   window.addEventListener('offline', renderPriceBits);
 }
@@ -1779,6 +1848,7 @@ function wire() {
 function boot() {
   try { S.hide = localStorage.getItem('hd.hide') === '1'; } catch (e) { /* ignore */ }
   S.data = loadData();
+  applyTheme();
   try {
     const p = JSON.parse(localStorage.getItem(PKEY) || 'null');
     if (p && p.items && p.fetchedAt) S.prices = p;
