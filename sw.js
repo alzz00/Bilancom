@@ -1,8 +1,9 @@
 // Uygulamayı telefonda saklar: internet yokken de açılır.
 // Her yayında VERSION değişmeli (node araclar/surum-artir.js); telefon yeni sürümü indirip "Yeni sürüm hazır" der.
-const VERSION = '2026.09.27-0521';
-const CACHE = 'hesap-defterim-' + VERSION;
-const SHELL = ['./', './index.html', './manifest.webmanifest', './ikonlar/ikon-180.png', './ikonlar/ikon-192.png', './ikonlar/ikon-512.png'];
+const VERSION = '2026.09.27-1605';
+const CACHE = 'bilancom-' + VERSION;
+const SHELL = ['./', './index.html', './manifest.webmanifest', './ikonlar/ikon-180.png', './ikonlar/ikon-192.png', './ikonlar/ikon-512.png',
+  './listeler/hisseler.json', './listeler/fonlar.json'];
 
 self.addEventListener('install', event => {
   // Fresh copies past the browser's HTTP cache, so a new version never mixes with old files.
@@ -12,7 +13,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k.startsWith('hesap-defterim-') && k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => (k.startsWith('bilancom-') || k.startsWith('hesap-defterim-')) && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });

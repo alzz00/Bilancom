@@ -1,6 +1,6 @@
-# Hesap Defterim
+# Bilancom
 
-Kişisel mali durum defteri: varlıklar (TL, döviz, altın çeşitleri, yatırım ürünleri), banka banka borçlar,
+Kişisel bilanço: varlıklar (TL, döviz, altın çeşitleri, yatırım ürünleri), banka banka borçlar,
 asgari ödemeler ve net birikim. iPhone'da ana ekrana eklenip uygulama gibi kullanılır.
 
 - **Veriler yalnızca telefonda saklanır.** Hiçbir sunucuya gönderilmez; Claude'da da bilgisayarda da durmaz.
@@ -17,12 +17,13 @@ asgari ödemeler ve net birikim. iPhone'da ana ekrana eklenip uygulama gibi kull
 | `index.html` | Uygulamanın tamamı (görünüm + hesaplar) |
 | `sw.js` | İnternetsiz açılış ve arka planda güncelleme |
 | `manifest.webmanifest`, `ikonlar/` | Ana ekran adı ve simgesi |
+| `listeler/` | Yazdıkça öneri için hisse (KAP) ve fon (TEFAS) listeleri |
 | `araclar/onizleme.js` | Bilgisayarda deneme: `node araclar/onizleme.js` → http://localhost:4546 |
 | `araclar/ikon-uret.js` | Simgeleri yeniden üretir: `node araclar/ikon-uret.js` |
 
 ## Yayın
 
-Adres: https://alzz00.github.io/hesap-defterim/ (GitHub Pages). Yayında yalnızca kod vardır, veri yoktur.
+Adres: https://alzz00.github.io/bilancom/ (GitHub Pages). Yayında yalnızca kod vardır, veri yoktur.
 
 Her güncellemede:
 

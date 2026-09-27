@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Hesap Defterim</title>
-<meta name="description" content="Varlıklarını, borçlarını ve birikimini tutan kişisel defter. Veriler yalnızca bu cihazda saklanır.">
+<title>Bilancom</title>
+<meta name="description" content="Varlıklarını, borçlarını ve birikimini gösteren kişisel bilanço. Veriler yalnızca bu cihazda saklanır.">
 <meta name="theme-color" content="#0A1120" id="themeColor">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Defterim">
+<meta name="apple-mobile-web-app-title" content="Bilancom">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="ikonlar/ikon-180.png">
@@ -310,7 +310,15 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .ico svg.i { width: 22px; height: 22px; }
 .rmain { flex: 1; min-width: 0; }
 .rtitle { display: block; font-size: 16.5px; font-weight: 650; line-height: 1.3; overflow-wrap: anywhere; }
-.rsub { display: block; margin-top: 2px; font-size: 14px; color: var(--ink-3); }
+.rsub { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; margin-top: 2px; font-size: 14px; color: var(--ink-3); }
+
+/* type-ahead choices under a field */
+.suggest { list-style: none; margin: 8px 0 0; padding: 6px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+.sg { display: flex; align-items: baseline; gap: 12px; min-height: 44px; padding: 11px 12px; border-radius: 11px; font-size: 16px; line-height: 1.3; cursor: pointer; -webkit-user-select: none; user-select: none; }
+.sg strong { flex: none; min-width: 58px; font-weight: 750; letter-spacing: .02em; color: var(--accent-text); }
+.sg span { min-width: 0; flex: 1; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.sg em { flex: none; font-style: normal; font-size: 12.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); }
+.sg.on, .sg:hover { background: var(--accent-soft); }
 .ramt { text-align: right; font-size: 17px; font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ramt small { display: block; font-size: 13.5px; font-weight: 500; color: var(--ink-3); }
 .group { padding-top: 12px; }
@@ -433,7 +441,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
         <svg class="i" viewBox="0 0 24 24"><path d="M3 5.8c3-1.1 6-1 9 .9 3-1.9 6-2 9-.9v12.6c-3-1.1-6-1-9 .9-3-1.9-6-2-9-.9z"/><path d="M12 6.7v12.6"/></svg>
       </div>
       <div>
-        <div class="brand-name">Hesap Defterim</div>
+        <div class="brand-name">Bilancom</div>
         <div class="brand-meta">
           <span id="today"></span>
           <span class="sync"><span class="sync-dot" id="syncDot"></span><span id="sync"></span></span>
@@ -468,7 +476,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
   <div class="banner" id="banner" hidden></div>
 
   <main class="view" id="view" role="tabpanel">
-    <div class="loading">Defterin açılıyor…</div>
+    <div class="loading">Bilancom açılıyor…</div>
   </main>
 
   <button class="fab" id="fab" type="button" aria-label="Yeni kayıt ekle" title="Yeni kayıt ekle">
@@ -480,16 +488,6 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
     <button class="btn primary sm" id="updateBtn" type="button">Yenile</button>
   </div>
 
-  <datalist id="bank-list">
-    <option value="Akbank"></option><option value="Albaraka Türk"></option><option value="DenizBank"></option>
-    <option value="Emlak Katılım"></option><option value="Enpara"></option><option value="Fibabanka"></option>
-    <option value="Garanti BBVA"></option><option value="Halkbank"></option><option value="HSBC"></option>
-    <option value="ING"></option><option value="İş Bankası"></option><option value="Kuveyt Türk"></option>
-    <option value="Odeabank"></option><option value="Papara"></option><option value="QNB"></option>
-    <option value="Şekerbank"></option><option value="TEB"></option><option value="Türkiye Finans"></option>
-    <option value="VakıfBank"></option><option value="Vakıf Katılım"></option><option value="Yapı Kredi"></option>
-    <option value="Ziraat Bankası"></option><option value="Ziraat Katılım"></option>
-  </datalist>
 </div>
 
 <div class="gate" id="gate" hidden>
@@ -497,7 +495,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
     <div class="brand-mark" aria-hidden="true">
       <svg class="i" viewBox="0 0 24 24"><path d="M3 5.8c3-1.1 6-1 9 .9 3-1.9 6-2 9-.9v12.6c-3-1.1-6-1-9 .9-3-1.9-6-2-9-.9z"/><path d="M12 6.7v12.6"/></svg>
     </div>
-    <h1>Hesap Defterim'i ana ekrana ekle</h1>
+    <h1>Bilancom'u ana ekrana ekle</h1>
     <p>Uygulama gibi açılır ve internet yokken de çalışır. Verilerin yalnızca bu telefonda saklanır.</p>
     <ol class="steps">
       <li>
@@ -510,7 +508,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
       </li>
       <li>
         <span class="step-ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.8c3-1.1 6-1 9 .9 3-1.9 6-2 9-.9v12.6c-3-1.1-6-1-9 .9-3-1.9-6-2-9-.9z"/><path d="M12 6.7v12.6"/></svg></span>
-        <span>Ana ekrandaki <b>Defterim</b> simgesinden aç. Hep oradan kullan.</span>
+        <span>Ana ekrandaki <b>Bilancom</b> simgesinden aç. Hep oradan kullan.</span>
       </li>
     </ol>
     <button class="btn ghost block" id="gateSkip" type="button">Şimdilik Safari'de dene</button>
@@ -610,13 +608,25 @@ const INV = [
   { id: 'kripto', label: 'Kripto' },
   { id: 'diger', label: 'Diğer' },
 ];
+// Choices offered while typing. Stocks and funds load from listeler/*.json the first time they are needed.
+const BANK_LIST = ['Ziraat Bankası', 'İş Bankası', 'Garanti BBVA', 'Yapı Kredi', 'Akbank', 'VakıfBank', 'Halkbank', 'QNB',
+  'DenizBank', 'Enpara', 'TEB', 'ING', 'Kuveyt Türk', 'Türkiye Finans', 'Albaraka Türk', 'Vakıf Katılım', 'Ziraat Katılım',
+  'Emlak Katılım', 'Dünya Katılım', 'Hayat Finans', 'Fibabanka', 'Şekerbank', 'Odeabank', 'Anadolubank', 'Alternatif Bank',
+  'Burgan Bank', 'HSBC', 'ICBC Turkey', 'Aktif Bank', 'CEPTETEB', 'Papara', 'Param', 'Tosla', 'ininal', 'Hepsipay', 'Midas', 'Colendi']
+  .map(name => ({ name }));
+const BES_LIST = ['Anadolu Hayat Emeklilik', 'Türkiye Hayat ve Emeklilik', 'Allianz Yaşam ve Emeklilik', 'AgeSA Hayat ve Emeklilik',
+  'Garanti BBVA Emeklilik', 'AXA Hayat ve Emeklilik', 'NN Hayat ve Emeklilik', 'Katılım Emeklilik', 'BNP Paribas Cardif Emeklilik',
+  'Bereket Emeklilik', 'HDI Fiba Emeklilik', 'Viennalife Emeklilik'].map(name => ({ name }));
+const CRYPTO_LIST = [['BTC', 'Bitcoin'], ['ETH', 'Ethereum'], ['USDT', 'Tether'], ['BNB', 'BNB'], ['SOL', 'Solana'], ['XRP', 'XRP'],
+  ['USDC', 'USD Coin'], ['ADA', 'Cardano'], ['DOGE', 'Dogecoin'], ['AVAX', 'Avalanche'], ['TRX', 'TRON'], ['DOT', 'Polkadot'],
+  ['LINK', 'Chainlink'], ['POL', 'Polygon'], ['LTC', 'Litecoin']].map(([code, name]) => ({ code, name }));
 const akind = id => AK.find(k => k.id === id) || AK[AK.length - 1];
 const dkind = id => DK.find(k => k.id === id) || DK[DK.length - 1];
 const fxOf = code => FX.find(f => f.code === code) || null;
 const goldOf = code => GOLD.find(g => g.code === code) || null;
 const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
 
-const APP_VERSION = '2026.09.27-0521';
+const APP_VERSION = '2026.09.27-1605';
 const KEY = 'hd.defter.v1';
 const PKEY = 'hd.fiyat.v1';
 const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
@@ -770,6 +780,8 @@ function cleanAsset(o) {
     qty: Math.max(0, num(o.qty != null ? o.qty : o.amount)),
     price: unit === 'MANUAL' ? Math.max(0, num(o.price)) : null,
     sub: mode === 'inv' ? invOf(o.sub).id : null,
+    code: mode === 'inv' ? str(o.code, 20) || null : null,
+    codeName: mode === 'inv' ? str(o.codeName, 140) || null : null,
     savedValue: Math.max(0, num(o.savedValue)),
     createdAt: num(o.createdAt), updatedAt: num(o.updatedAt),
   };
@@ -893,10 +905,13 @@ async function refreshPrices(force) {
     S.prices = { fetchedAt: Date.now(), sourceAt, items: { ...((S.prices && S.prices.items) || {}), ...items } };
     try { localStorage.setItem(PKEY, JSON.stringify(S.prices)); } catch (e) { /* prices are refetched anyway */ }
     S.priceError = false;
+    S.priceRetried = false;
     const next = clone(S.data);
     if (recordHistory(next) && persist(next)) S.data = next;
   } catch (e) {
     S.priceError = true;
+    // The feed sometimes drops a connection; one quick retry covers most of those.
+    if (!S.priceRetried) { S.priceRetried = true; setTimeout(() => refreshPrices(true), 5000); }
   } finally {
     S.priceLoading = false;
     render();
@@ -1330,7 +1345,8 @@ function assetSub(a) {
   if (mode === 'fx') { const f = fxOf(a.unit); return `${a.title === f.label ? '' : f.label + ' · '}${fmtQty(a.qty)} ${f.sym}${missing}`; }
   if (mode === 'gold') { const g = goldOf(a.unit); return `${a.title === g.title ? '' : g.title + ' · '}${fmtQty(a.qty)} ${g.unit}${missing}`; }
   if (mode === 'inv') {
-    const s = invOf(a.sub).label;
+    const extra = a.codeName ? ` · ${a.codeName}` : a.code && a.code !== a.title ? ` · ${a.code}` : '';
+    const s = invOf(a.sub).label + extra;
     return a.unit === 'MANUAL' ? `${s} · ${fmtQty(a.qty)} adet × ${money2(a.price)}` : s;
   }
   return akind(a.kind).label;
@@ -1493,6 +1509,87 @@ function deleteBlock(onConfirm) {
   return box;
 }
 
+/* ---------- type-ahead ---------- */
+const TR_FOLD = { ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u', â: 'a', î: 'i', û: 'u' };
+const fold = s => String(s || '').toLocaleLowerCase('tr').replace(/[çğıöşüâîû]/g, c => TR_FOLD[c]);
+function prepList(list) {
+  for (const it of list) {
+    it._c = fold(it.code);
+    it._n = fold(it.name);
+    it._w = it._n.split(/[\s·.,\-\/()&]+/).filter(Boolean);
+  }
+  return list;
+}
+[BANK_LIST, BES_LIST, CRYPTO_LIST].forEach(prepList);
+const LISTS = {};
+function loadList(name) {
+  if (!LISTS[name]) {
+    LISTS[name] = fetch(`listeler/${name}.json`)
+      .then(r => (r.ok ? r.json() : []))
+      .then(arr => prepList(Array.isArray(arr) ? arr.filter(it => it && typeof it.name === 'string') : []))
+      .catch(() => { delete LISTS[name]; return []; });
+  }
+  return LISTS[name];
+}
+// Code matches first, then names that start with the query, then every typed word starting some word of the name.
+function matchScore(q, toks, it) {
+  if (it._c && it._c === q) return 6;
+  if (it._c && it._c.startsWith(q)) return 5;
+  if (it._n.startsWith(q)) return 4;
+  if (toks.every(t => (it._c && it._c.startsWith(t)) || it._w.some(w => w.startsWith(t)))) return 3;
+  // Mid-word matches only once three letters are typed; shorter ones pull in noise.
+  return q.length >= 3 && it._n.includes(q) ? 1 : 0;
+}
+function searchList(list, raw, max = 7) {
+  const q = fold(raw).trim();
+  if (!q) return list.slice(0, max);
+  const toks = q.split(/\s+/);
+  const hits = [];
+  for (const it of list) { const s = matchScore(q, toks, it); if (s) hits.push([s, it]); }
+  hits.sort((a, b) => b[0] - a[0] || (a[1].code || a[1].name).localeCompare(b[1].code || b[1].name, 'tr'));
+  return hits.slice(0, max).map(x => x[1]);
+}
+// A text field that lists matching choices as you type (and the first few on focus). Free text stays allowed.
+function suggestBox(input, source, onPick) {
+  const list = h('ul', { class: 'suggest', role: 'listbox', hidden: true });
+  input.setAttribute('role', 'combobox');
+  input.setAttribute('aria-autocomplete', 'list');
+  input.setAttribute('aria-expanded', 'false');
+  let items = [], active = -1, seq = 0;
+  const close = () => {
+    items = []; active = -1; list.hidden = true;
+    input.setAttribute('aria-expanded', 'false');
+  };
+  const pick = it => { onPick(it); close(); };
+  const draw = () => {
+    list.replaceChildren(...items.map((it, i) => h('li', {
+      class: 'sg' + (i === active ? ' on' : ''), role: 'option', 'aria-selected': String(i === active),
+      // Pick on press so the tap lands before the keyboard or focus moves.
+      onpointerdown: e => { e.preventDefault(); pick(it); },
+    }, it.code ? h('strong', null, it.code) : null, h('span', null, it.name),
+      it.type === 'EMK' ? h('em', null, 'BES') : it.type === 'BYF' ? h('em', null, 'Borsa') : null)));
+    list.hidden = !items.length;
+    input.setAttribute('aria-expanded', String(!list.hidden));
+  };
+  const update = async () => {
+    const mine = ++seq;
+    const found = await source(input.value);
+    if (mine !== seq || document.activeElement !== input) return;
+    items = found || []; active = -1; draw();
+  };
+  input.addEventListener('input', update);
+  input.addEventListener('focus', update);
+  input.addEventListener('blur', () => setTimeout(close, 120));
+  input.addEventListener('keydown', e => {
+    if (list.hidden) return;
+    if (e.key === 'ArrowDown') { active = Math.min(items.length - 1, active + 1); draw(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { active = Math.max(0, active - 1); draw(); e.preventDefault(); }
+    else if (e.key === 'Enter' && active >= 0) { pick(items[active]); e.preventDefault(); }
+    else if (e.key === 'Escape') { close(); e.stopPropagation(); }
+  });
+  return { wrap: h('div', null, input, list), close };
+}
+
 function openChooser() {
   openSheet('Ne eklemek istersin?', h('div', { class: 'choose' },
     h('button', { class: 'choice', type: 'button', onclick: () => openAsset(null) },
@@ -1512,11 +1609,36 @@ function openAsset(a) {
     gold: mode0 === 'gold' ? a.unit : 'GRA',
     sub: a && a.sub ? a.sub : 'hisse',
     inv: a && a.unit === 'MANUAL' ? 'adet' : 'tutar',
+    code: (a && a.code) || null,
+    codeName: (a && a.codeName) || null,
   };
   // An automatic title (e.g. "Dolar") follows the chosen unit, so start it empty.
   const autoTitle = a && (mode0 === 'fx' || mode0 === 'gold') && a.title === defaultTitle(a.kind, a.unit);
   const title = h('input', { class: 'input', id: 'f-title', maxlength: 80, autocomplete: 'off', value: a && !autoTitle ? a.title : null });
   const titleLabel = h('label', { class: 'lbl', for: 'f-title' }, 'Başlık');
+  const INV_HINT = {
+    hisse: ['Hangi hisse?', 'Kod ya da ad yaz: THYAO'],
+    fon: ['Hangi fon?', 'Kod ya da ad yaz: AFT'],
+    bes: ['Hangi şirket?', 'örn. Anadolu Hayat'],
+    kripto: ['Hangi kripto?', 'örn. Bitcoin'],
+    diger: ['Başlık', 'örn. Eurobond'],
+  };
+  // Typing by hand drops an earlier pick; picking fills the field and remembers the code.
+  title.addEventListener('input', () => { st.code = null; st.codeName = null; });
+  const titleSuggest = suggestBox(title, q => {
+    if (st.kind === 'banka') return searchList(BANK_LIST, q);
+    if (st.kind !== 'yatirim') return [];
+    if (st.sub === 'hisse') return loadList('hisseler').then(l => searchList(l, q));
+    if (st.sub === 'fon') return loadList('fonlar').then(l => searchList(l, q));
+    if (st.sub === 'bes') return searchList(BES_LIST, q);
+    if (st.sub === 'kripto') return searchList(CRYPTO_LIST, q);
+    return [];
+  }, it => {
+    const named = !it.code || st.sub === 'kripto';
+    title.value = named ? it.name : it.code;
+    st.code = it.code || null;
+    st.codeName = it.code && !named ? it.name : null;
+  });
   const tl = moneyInput('f-amount', a && a.unit === 'TRY' ? a.qty : null);
   const qty = qtyInput('f-qty', a && a.unit !== 'TRY' ? a.qty : null);
   const price = moneyInput('f-price', a && a.unit === 'MANUAL' ? a.price : null);
@@ -1548,7 +1670,7 @@ function openAsset(a) {
   const titleField = (label, placeholder) => {
     titleLabel.textContent = label;
     title.placeholder = placeholder;
-    return h('div', { class: 'field' }, titleLabel, title);
+    return h('div', { class: 'field' }, titleLabel, titleSuggest.wrap);
   };
   function layout() {
     const mode = akind(st.kind).mode;
@@ -1565,8 +1687,12 @@ function openAsset(a) {
       setQty(st.gold);
       parts.push(qty.field, preview, titleField('Başlık (isteğe bağlı)', 'örn. Düğün altınları'));
     } else if (mode === 'inv') {
-      parts.push(field('Ürün', chipGroup(INV.map(x => ({ id: x.id, label: x.label })), st.sub, v => { st.sub = v; }, 'Yatırım ürünü')));
-      parts.push(titleField('Başlık', 'örn. THYAO, AFT fonu, Bitcoin'));
+      parts.push(field('Ürün', chipGroup(INV.map(x => ({ id: x.id, label: x.label })), st.sub, v => {
+        st.sub = v; st.code = null; st.codeName = null;
+        [titleLabel.textContent, title.placeholder] = INV_HINT[v];
+        titleSuggest.close();
+      }, 'Yatırım ürünü')));
+      parts.push(titleField(...INV_HINT[st.sub]));
       parts.push(field('Değeri nasıl gireceksin?', segmented([{ id: 'tutar', label: 'Toplam tutar' }, { id: 'adet', label: 'Adet × fiyat' }], st.inv,
         v => { st.inv = v; layout(); })));
       if (st.inv === 'adet') {
@@ -1576,8 +1702,8 @@ function openAsset(a) {
         parts.push(field('Güncel değer', tl.wrap, 'f-amount'));
       }
     } else {
-      const ph = { banka: 'örn. Vadeli hesap · Ziraat', nakit: 'örn. Cüzdan', ev: 'örn. Daire', arac: 'örn. Araba' }[st.kind] || 'örn. Alacak';
-      parts.push(titleField('Başlık', ph), field('Tutar', tl.wrap, 'f-amount'));
+      const ph = { banka: 'Yaz ya da seç: Ziraat, Garanti…', nakit: 'örn. Cüzdan', ev: 'örn. Daire', arac: 'örn. Araba' }[st.kind] || 'örn. Alacak';
+      parts.push(titleField(st.kind === 'banka' ? 'Hangi banka?' : 'Başlık', ph), field('Tutar', tl.wrap, 'f-amount'));
     }
     dyn.replaceChildren(...parts);
     updatePreview();
@@ -1618,6 +1744,7 @@ function openAsset(a) {
     const item = {
       id: a ? a.id : newId(), kind: st.kind, title: name, unit, qty: round4(q),
       price: pr != null ? round2(pr) : null, sub: mode === 'inv' ? st.sub : null, savedValue: 0,
+      code: mode === 'inv' ? st.code : null, codeName: mode === 'inv' ? st.codeName : null,
       createdAt: (a && a.createdAt) || now, updatedAt: now,
     };
     item.savedValue = Math.round(assetValue(item)) || (a && a.unit === unit ? a.savedValue : 0);
@@ -1630,7 +1757,8 @@ function openAsset(a) {
 function openDebt(x) {
   const isNew = !x;
   const st = { kind: x ? x.kind : 'kart' };
-  const bank = h('input', { class: 'input', id: 'f-bank', list: 'bank-list', maxlength: 60, autocomplete: 'off', placeholder: 'örn. Garanti BBVA', value: x ? x.bank : null });
+  const bank = h('input', { class: 'input', id: 'f-bank', maxlength: 60, autocomplete: 'off', placeholder: 'Yaz ya da seç: Garanti, Ziraat…', value: x ? x.bank : null });
+  const bankSuggest = suggestBox(bank, q => searchList(BANK_LIST, q), it => { bank.value = it.name; });
   const total = moneyInput('f-total', x ? x.total : null);
   const min = moneyInput('f-min', x && x.minimum ? x.minimum : null);
   const minLabel = h('label', { class: 'lbl', for: 'f-min' }, dkind(st.kind).pay);
@@ -1642,7 +1770,7 @@ function openDebt(x) {
   const fail = (msg, el) => { err.textContent = msg; if (el) el.focus(); };
   const save = h('button', { class: 'btn primary block', type: 'submit' }, isNew ? 'Kaydet' : 'Değişiklikleri kaydet');
   const form = h('form', { novalidate: true },
-    field('Banka ya da kişi', bank, 'f-bank'),
+    field('Banka ya da kişi', bankSuggest.wrap, 'f-bank'),
     field('Borç türü', chipGroup(DK.map(k => ({ id: k.id, label: k.label, icon: k.icon })), st.kind, v => { st.kind = v; minLabel.textContent = dkind(v).pay; }, 'Borç türü')),
     h('div', { class: 'two' },
       field('Toplam borç', total.wrap, 'f-total'),
@@ -1707,8 +1835,8 @@ function openSettings() {
 
 function backup() {
   const d = S.data;
-  const payload = { app: 'hesap-defterim', v: 1, exportedAt: new Date().toISOString(), data: { assets: d.assets, debts: d.debts, history: d.history } };
-  const name = `hesap-defterim-yedek-${isoDate(new Date())}.json`;
+  const payload = { app: 'bilancom', v: 1, exportedAt: new Date().toISOString(), data: { assets: d.assets, debts: d.debts, history: d.history } };
+  const name = `bilancom-yedek-${isoDate(new Date())}.json`;
   const text = JSON.stringify(payload, null, 2);
   const done = msg => {
     const next = clone(S.data);
@@ -1721,7 +1849,7 @@ function backup() {
   let file = null;
   try { file = new File([text], name, { type: 'application/json' }); } catch (e) { file = null; }
   if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
-    navigator.share({ files: [file], title: 'Hesap Defterim yedeği' })
+    navigator.share({ files: [file], title: 'Bilancom yedeği' })
       .then(() => done('Yedek hazır. Dosyalar’a kaydettiysen tamam.'))
       .catch(e => { if (e && e.name !== 'AbortError') toast('Paylaşım açılamadı. Tekrar dene.'); });
     return;
@@ -1742,7 +1870,7 @@ function restorePick() {
     if (!f) return;
     let o = null;
     try { o = JSON.parse(await f.text()); } catch (e) { o = null; }
-    if (!o || o.app !== 'hesap-defterim' || !o.data) { toast('Bu dosya bir Hesap Defterim yedeği değil.'); return; }
+    if (!o || (o.app !== 'bilancom' && o.app !== 'hesap-defterim') || !o.data) { toast('Bu dosya bir Bilancom yedeği değil.'); return; }
     const d = sanitizeData(o.data);
     const when = o.exportedAt ? new Date(o.exportedAt) : null;
     const whenText = when && !isNaN(when) ? `${when.getDate()} ${AY[when.getMonth()]} ${when.getFullYear()} tarihli yedek.` : 'Tarihi bilinmeyen yedek.';

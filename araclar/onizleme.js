@@ -25,4 +25,4 @@ http.createServer((req, res) => {
     res.writeHead(200, { 'content-type': types[path.extname(file)] || 'application/octet-stream', 'cache-control': 'no-cache' });
     res.end(buf);
   });
-}).listen(port, '127.0.0.1', () => console.log(`Hesap Defterim önizleme: http://localhost:${port}`));
+}).listen(port, '127.0.0.1', () => console.log(`Bilancom önizleme: http://localhost:${port}`));

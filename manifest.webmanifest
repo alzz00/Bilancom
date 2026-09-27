@@ -1,7 +1,7 @@
 {
-  "name": "Hesap Defterim",
-  "short_name": "Defterim",
-  "description": "Varlıklarını, borçlarını ve birikimini tutan kişisel defter. Veriler yalnızca bu cihazda saklanır.",
+  "name": "Bilancom",
+  "short_name": "Bilancom",
+  "description": "Varlıklarını, borçlarını ve birikimini gösteren kişisel bilanço. Veriler yalnızca bu cihazda saklanır.",
   "lang": "tr",
   "start_url": "./",
   "scope": "./",
