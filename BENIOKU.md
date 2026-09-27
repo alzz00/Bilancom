@@ -21,5 +21,11 @@ asgari ödemeler ve net birikim. iPhone'da ana ekrana eklenip uygulama gibi kull
 
 ## Yayın
 
-Uygulama GitHub Pages üzerinden yayınlanır; yayında yalnızca kod vardır, veri yoktur.
-Kod değişip GitHub'a gönderilince telefondaki uygulama bir sonraki açılışta kendini günceller.
+Adres: https://alzz00.github.io/hesap-defterim/ (GitHub Pages). Yayında yalnızca kod vardır, veri yoktur.
+
+Her güncellemede:
+
+1. `node araclar/surum-artir.js` — `index.html` ve `sw.js`'ye aynı yeni sürüm numarasını yazar.
+2. Değişikliği GitHub'a gönder (`git commit` + `git push`). Pages 1-2 dakikada yayınlar.
+3. Telefonda uygulama açılınca yeni sürümü arka planda indirir ve üstte **"Yeni sürüm hazır – Yenile"** gösterir.
+   Kayıtlar olduğu gibi kalır. Kurulu sürüm **Ayarlar**'ın en altında yazar.

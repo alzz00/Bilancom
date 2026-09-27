@@ -359,6 +359,11 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .note-box { display: flex; gap: 12px; margin-top: 16px; padding: 14px; border-radius: 16px; background: var(--surface-2); font-size: 14.5px; color: var(--ink-2); }
 .note-box svg.i { color: var(--accent); }
 
+/* new version notice */
+.update-bar { position: fixed; z-index: 85; left: 50%; top: calc(10px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); display: flex; align-items: center; gap: 14px; width: max-content; max-width: calc(100% - 32px); padding: 8px 8px 8px 16px; border-radius: 16px; background: var(--ink); color: var(--bg); box-shadow: 0 12px 30px -12px rgba(0, 0, 0, .45); font-size: 15px; font-weight: 650; animation: rise .24s cubic-bezier(.2, .8, .2, 1); }
+.update-bar .btn { height: 40px; }
+.version { margin-top: 14px; text-align: center; font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
 /* install guide for Safari */
 .gate { position: fixed; z-index: 80; inset: 0; overflow-y: auto; background: var(--bg); padding: calc(28px + env(safe-area-inset-top, 0px)) 20px calc(28px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: center; }
 .gate-card { width: 100%; max-width: 440px; margin: auto 0; }
@@ -427,6 +432,10 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
     <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
   </button>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="update-bar" id="updateBar" role="status" hidden>
+    <span>Yeni sürüm hazır</span>
+    <button class="btn primary sm" id="updateBtn" type="button">Yenile</button>
+  </div>
 
   <datalist id="bank-list">
     <option value="Akbank"></option><option value="Albaraka Türk"></option><option value="DenizBank"></option>
@@ -564,6 +573,7 @@ const fxOf = code => FX.find(f => f.code === code) || null;
 const goldOf = code => GOLD.find(g => g.code === code) || null;
 const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
 
+const APP_VERSION = '2026.09.27-0427';
 const KEY = 'hd.defter.v1';
 const PKEY = 'hd.fiyat.v1';
 const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
@@ -1644,7 +1654,8 @@ function openSettings() {
       row('refresh', 'Fiyatları yenile', S.prices ? `Son fiyatlar: ${shortStamp(new Date(S.prices.sourceAt))}` : 'Henüz fiyat yok', () => { refreshPrices(true); closeSheet(); }),
       row('trash', 'Tüm verileri sil', 'Bu telefondaki kayıtları temizler.', confirmWipe, ' danger')),
     h('div', { class: 'note-box' }, icon('info'),
-      h('span', null, 'Verilerin yalnızca bu telefonda saklanır, hiçbir sunucuya gönderilmez. Sadece altın ve döviz fiyatları internetten çekilir. Ana ekrandaki simgeyi silersen veriler de silinir; önce yedek al.'))));
+      h('span', null, 'Verilerin yalnızca bu telefonda saklanır, hiçbir sunucuya gönderilmez. Sadece altın ve döviz fiyatları internetten çekilir. Ana ekrandaki simgeyi silersen veriler de silinir; önce yedek al.')),
+    h('div', { class: 'version' }, `Sürüm ${APP_VERSION}`)));
 }
 
 function backup() {
@@ -1777,9 +1788,33 @@ function boot() {
   render();
   refreshPrices(false);
   setInterval(() => { if (!document.hidden) refreshPrices(false); }, 5 * 60 * 1000);
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-    navigator.serviceWorker.register('sw.js').catch(() => { /* works without offline support */ });
-  }
+  setupUpdates();
+}
+
+/* ---------- offline copy & updates ---------- */
+// A new version installs in the background and waits; the user switches to it with one tap.
+function setupUpdates() {
+  if (!('serviceWorker' in navigator) || !(location.protocol === 'https:' || location.hostname === 'localhost')) return;
+  let requested = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (requested) location.reload(); });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+    const offer = () => {
+      if (!reg.waiting || !navigator.serviceWorker.controller) return;
+      $('#updateBar').hidden = false;
+      $('#updateBtn').onclick = () => {
+        if (!reg.waiting) { location.reload(); return; }
+        requested = true;
+        $('#updateBtn').disabled = true;
+        reg.waiting.postMessage('yenile');
+      };
+    };
+    offer();
+    reg.addEventListener('updatefound', () => {
+      const w = reg.installing;
+      if (w) w.addEventListener('statechange', () => { if (w.state === 'installed') offer(); });
+    });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+  }).catch(() => { /* works without offline support */ });
 }
 
 boot();
