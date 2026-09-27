@@ -21,6 +21,8 @@
   try { t = localStorage.getItem('hd.tema') || 'koyu'; } catch (e) { /* default */ }
   if (t === 'oto') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'acik' : 'koyu';
   document.documentElement.setAttribute('data-tema', t === 'acik' ? 'acik' : 'koyu');
+  // With a passcode set, keep every amount hidden from the first paint until it is entered.
+  try { if (localStorage.getItem('hd.kilit')) document.documentElement.classList.add('pin-on'); } catch (e) { /* no lock */ }
 })();
 </script>
 <style>
@@ -536,6 +538,32 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
   }
 }
 
+/* passcode lock */
+html.pin-on .app { visibility: hidden; }
+.pin { position: fixed; z-index: 120; inset: 0; overflow-y: auto; display: flex; justify-content: center; padding: calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px)); background: var(--page-glow), var(--bg); color: var(--ink); }
+.pin:focus { outline: none; }
+.pin-box { display: flex; flex-direction: column; align-items: center; margin: auto 0; text-align: center; }
+.pin-box.in-sheet { margin: 8px 0 4px; }
+.pin .brand-mark { width: 64px; height: 64px; border-radius: 18px; }
+.pin .brand-mark svg.i { width: 34px; height: 34px; }
+.pin h1 { margin: 16px 0 6px; font-family: var(--font-display); font-size: 25px; line-height: 1.15; }
+.pin-msg { min-height: 22px; margin: 0; font-size: 16px; color: var(--ink-2); }
+.pin-msg.bad { color: var(--crit); font-weight: 600; }
+.pin-dots { display: flex; gap: 18px; margin: 22px 0 28px; }
+.pin-dots span { width: 15px; height: 15px; border: 2px solid var(--ink-3); border-radius: 50%; transition: background-color .12s, border-color .12s; }
+.pin-dots span.on { background: var(--accent); border-color: var(--accent); }
+.pin-dots.shake { animation: shake .4s; }
+@keyframes shake { 0%, 100% { transform: none; } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+.pin-pad { display: grid; grid-template-columns: repeat(3, 76px); gap: 16px 26px; }
+.pin-key { width: 76px; height: 76px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: var(--surface-2); color: var(--ink); font-size: 30px; font-weight: 500; font-variant-numeric: tabular-nums; -webkit-user-select: none; user-select: none; }
+.pin-key:active { background: var(--accent-soft); }
+.pin-key.ghost { background: none; color: var(--ink-2); }
+.pin-key svg.i { width: 28px; height: 28px; }
+.pin-link { margin-top: 24px; padding: 10px; border: 0; background: none; color: var(--ink-3); font-size: 15px; font-weight: 600; }
+.pin-note { max-width: 34ch; margin: 4px 0 0; font-size: 15.5px; color: var(--ink-2); }
+.pin-actions { display: grid; gap: 10px; width: min(100%, 340px); margin-top: 24px; }
+.pin-hint { max-width: 36ch; margin-top: 18px; text-align: center; }
+
 .loading { padding: 64px 0; text-align: center; font-size: 16px; color: var(--ink-3); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -624,6 +652,8 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
   </div>
 </div>
 
+<div class="pin" id="pin" role="dialog" aria-modal="true" aria-labelledby="pinT" tabindex="-1" hidden></div>
+
 <script>
 (() => {
 'use strict';
@@ -655,6 +685,9 @@ const ICONS = {
   chevL: '<path d="M14.5 6 8.5 12l6 6"/>',
   chevR: '<path d="M9.5 6l6 6-6 6"/>',
   pencil: '<path d="M4.5 19.5l.9-4.2L15.8 4.9a1.9 1.9 0 0 1 2.7 0l.6.6a1.9 1.9 0 0 1 0 2.7L8.7 18.6z"/><path d="M13.9 6.8l3.3 3.3"/>',
+  lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7"/>',
+  backspace: '<path d="M9 5.5h10.5A1.5 1.5 0 0 1 21 7v10a1.5 1.5 0 0 1-1.5 1.5H9L3.5 12z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/>',
+  book: '<path d="M3 5.8c3-1.1 6-1 9 .9 3-1.9 6-2 9-.9v12.6c-3-1.1-6-1-9 .9-3-1.9-6-2-9-.9z"/><path d="M12 6.7v12.6"/>',
   eye: '<path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',
   eyeOff: '<path d="M2.5 12S6 5.8 12 5.8c1.7 0 3.2.5 4.5 1.2M21.5 12s-1.2 2.2-3.5 3.9M9.5 17.8c.8.3 1.6.4 2.5.4"/><path d="M4 4l16 16"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.4 7.4 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.4 7.4 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 2.6-1.5l2.4 1 2-3.4z"/>',
@@ -753,7 +786,7 @@ const fxOf = code => FX.find(f => f.code === code) || null;
 const goldOf = code => GOLD.find(g => g.code === code) || null;
 const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
 
-const APP_VERSION = '2026.09.27-2145';
+const APP_VERSION = '2026.09.28-0115';
 const KEY = 'hd.defter.v1';
 const PKEY = 'hd.fiyat.v1';
 const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
@@ -2630,6 +2663,7 @@ function openSettings() {
       }),
       h('div', { class: 'hint' }, 'Net: varlıkların eksi borçların. Toplam: borçlar düşülmez; borçlarını maaşınla ödüyorsan bunu seç.')),
     h('ul', { class: 'set-list' },
+      row('lock', 'Şifre kilidi', pinConfig() ? 'Açık · açılışta şifre sorar' : 'Kapalı · açılışta şifre sorsun', openPinSettings),
       row('wallet', 'Maaş', d.income ? `${money(d.income.amount)} · her ayın ${ordinal(d.income.day)}` : 'Maaşını ve yattığı hesabı ekle.', () => { closeSheet(true); openSalary(); }),
       row('download', 'Yedek al', `${last}. Dosyalar’a ya da iCloud’a kaydet.`, backup),
       row('upload', 'Yedekten geri yükle', 'Daha önce aldığın yedek dosyasını seç.', restorePick),
@@ -2733,6 +2767,189 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
+/* ---------- passcode lock ---------- */
+// A privacy screen, not encryption: only a salted hash of the code is kept, apart from the records and backups.
+const PIN_KEY = 'hd.kilit';
+const PIN_TRY_KEY = 'hd.kilit.deneme';
+const PIN_LEN = 4;
+const PIN_GRACE = 30 * 1000; // a quick switch to another app doesn't ask again
+const hex = bytes => Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+function pinConfig() {
+  try { const o = JSON.parse(localStorage.getItem(PIN_KEY) || 'null'); return o && o.hash && o.salt ? o : null; } catch (e) { return null; }
+}
+async function pinHash(code, salt) {
+  return hex(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${salt}:${code}`))));
+}
+async function setPin(code) {
+  const salt = hex(crypto.getRandomValues(new Uint8Array(16)));
+  localStorage.setItem(PIN_KEY, JSON.stringify({ v: 1, salt, hash: await pinHash(code, salt) }));
+  localStorage.removeItem(PIN_TRY_KEY);
+}
+async function checkPin(code) {
+  const c = pinConfig();
+  return !!c && (await pinHash(code, c.salt)) === c.hash;
+}
+function clearPin() {
+  try { localStorage.removeItem(PIN_KEY); localStorage.removeItem(PIN_TRY_KEY); } catch (e) { /* nothing stored */ }
+}
+// After five wrong codes the keypad rests for 30 seconds, even across a restart.
+function pinTries() { try { return JSON.parse(localStorage.getItem(PIN_TRY_KEY) || '{}') || {}; } catch (e) { return {}; } }
+function pinWaitLeft() { const t = pinTries(); return t.until > Date.now() ? Math.ceil((t.until - Date.now()) / 1000) : 0; }
+function pinFailed() {
+  const n = (pinTries().n || 0) + 1;
+  try { localStorage.setItem(PIN_TRY_KEY, JSON.stringify(n >= 5 ? { n: 0, until: Date.now() + 30000 } : { n })); } catch (e) { /* this visit only */ }
+  return n >= 5;
+}
+
+// Four dots and a number pad; onFull gets the code once four digits are in.
+function pinPad(onFull) {
+  let code = '';
+  const dots = h('div', { class: 'pin-dots', 'aria-hidden': 'true' }, Array.from({ length: PIN_LEN }, () => h('span')));
+  const draw = () => [...dots.children].forEach((s, i) => s.classList.toggle('on', i < code.length));
+  const pad = {
+    busy: false,
+    press(d) {
+      if (pad.busy || code.length >= PIN_LEN) return;
+      code += d;
+      draw();
+      if (code.length === PIN_LEN) { pad.busy = true; const c = code; setTimeout(() => onFull(c), 120); }
+    },
+    back() { if (!pad.busy) { code = code.slice(0, -1); draw(); } },
+    reset() { code = ''; pad.busy = false; draw(); },
+    shake() {
+      dots.classList.remove('shake');
+      void dots.offsetWidth;
+      dots.classList.add('shake');
+      if (navigator.vibrate) navigator.vibrate(80);
+    },
+  };
+  const key = (d, label) => h('button', { class: 'pin-key', type: 'button', 'aria-label': label || d, onclick: () => pad.press(d) }, d);
+  pad.el = [dots, h('div', { class: 'pin-pad' },
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9'].map(d => key(d)),
+    h('span'), key('0'),
+    h('button', { class: 'pin-key ghost', type: 'button', 'aria-label': 'Son rakamı sil', onclick: () => pad.back() }, icon('backspace')))];
+  return pad;
+}
+
+let pinOpen = false, pinKeys = null, hiddenAt = 0;
+function showLock() {
+  if (!pinConfig()) return;
+  if (pinKeys) document.removeEventListener('keydown', pinKeys);
+  pinOpen = true;
+  document.documentElement.classList.add('pin-on');
+  const box = $('#pin');
+  const msg = h('p', { class: 'pin-msg', role: 'status', 'aria-live': 'polite' }, 'Şifreni gir');
+  const say = (text, bad) => { msg.textContent = text; msg.className = 'pin-msg' + (bad ? ' bad' : ''); };
+  const pad = pinPad(async code => {
+    const wait = pinWaitLeft();
+    if (wait) { pad.reset(); say(`${wait} saniye sonra tekrar dene.`, true); return; }
+    if (await checkPin(code)) { try { localStorage.removeItem(PIN_TRY_KEY); } catch (e) { /* ignore */ } unlock(); return; }
+    const rest = pinFailed();
+    pad.shake();
+    pad.reset();
+    say(rest ? 'Çok fazla deneme. 30 saniye sonra tekrar dene.' : 'Şifre yanlış, tekrar dene.', true);
+  });
+  box.replaceChildren(h('div', { class: 'pin-box' },
+    h('div', { class: 'brand-mark', 'aria-hidden': 'true' }, icon('book')),
+    h('h1', { id: 'pinT' }, 'Bilancom'),
+    msg, pad.el,
+    h('button', { class: 'pin-link', type: 'button', onclick: forgotPin }, 'Şifremi unuttum')));
+  box.hidden = false;
+  pinKeys = e => { if (/^[0-9]$/.test(e.key)) pad.press(e.key); else if (e.key === 'Backspace') pad.back(); };
+  document.addEventListener('keydown', pinKeys);
+  setTimeout(() => box.focus(), 30);
+}
+function unlock() {
+  pinOpen = false;
+  if (pinKeys) document.removeEventListener('keydown', pinKeys);
+  pinKeys = null;
+  const box = $('#pin');
+  box.hidden = true;
+  box.replaceChildren();
+  document.documentElement.classList.remove('pin-on');
+}
+// Without the code the only way in is a clean start; the records come back from a backup.
+function forgotPin() {
+  if (pinKeys) document.removeEventListener('keydown', pinKeys);
+  pinKeys = null;
+  $('#pin').replaceChildren(h('div', { class: 'pin-box' },
+    h('div', { class: 'brand-mark', 'aria-hidden': 'true' }, icon('lock')),
+    h('h1', { id: 'pinT' }, 'Şifreni mi unuttun?'),
+    h('p', { class: 'pin-note' }, 'Kilidi açmanın tek yolu bu telefondaki Bilancom kayıtlarını silmek. Sonra Ayarlar → Yedekten geri yükle ile yedeğini geri alabilirsin.'),
+    h('div', { class: 'pin-actions' },
+      h('button', { class: 'btn danger block', type: 'button', onclick: () => {
+        const next = emptyData();
+        if (!persist(next)) return;
+        S.data = next;
+        clearPin();
+        unlock();
+        render();
+        toast('Kayıtlar silindi, kilit kaldırıldı. Yedeğin varsa Ayarlar’dan geri yükle.');
+      } }, 'Kayıtları sil ve kilidi kaldır'),
+      h('button', { class: 'btn ghost block', type: 'button', onclick: showLock }, 'Vazgeç'))));
+}
+// Leaving the app hides the amounts (also from the app switcher); coming back after a while asks for the code.
+function lockOnHide() {
+  hiddenAt = Date.now();
+  if (pinConfig()) document.documentElement.classList.add('pin-on');
+}
+function lockOnShow() {
+  if (!pinConfig() || pinOpen) return;
+  if (Date.now() - hiddenAt >= PIN_GRACE) showLock();
+  else document.documentElement.classList.remove('pin-on');
+}
+
+// Settings: turn the lock on, change the code, or turn it off (the last two ask for the current code).
+function openPinSettings() {
+  if (!pinConfig()) { pinSetup(false); return; }
+  openSheet('Şifre kilidi', h('div', null,
+    h('p', { class: 'sheet-text' }, 'Açık. Bilancom her açılışta ve 30 saniyeden uzun ara verince şifre sorar.'),
+    h('div', { class: 'sheet-actions' },
+      h('button', { class: 'btn soft block', type: 'button', onclick: () => pinVerify(() => pinSetup(true)) }, 'Şifreyi değiştir'),
+      h('button', { class: 'btn text-danger block', type: 'button', onclick: () => pinVerify(() => {
+        clearPin();
+        closeSheet();
+        toast('Şifre kilidi kapatıldı');
+      }) }, 'Kilidi kapat'))));
+}
+function pinVerify(next) {
+  const msg = h('p', { class: 'pin-msg' }, 'Şu anki şifreni gir');
+  const pad = pinPad(async code => {
+    if (await checkPin(code)) { next(); return; }
+    pad.shake();
+    pad.reset();
+    msg.textContent = 'Şifre yanlış, tekrar dene.';
+    msg.className = 'pin-msg bad';
+  });
+  openSheet('Şifre kilidi', h('div', { class: 'pin-box in-sheet' }, msg, pad.el));
+}
+function pinSetup(changing) {
+  let first = null;
+  const msg = h('p', { class: 'pin-msg' }, `Yeni şifreni gir (${PIN_LEN} rakam)`);
+  const pad = pinPad(async code => {
+    if (first == null) {
+      first = code;
+      pad.reset();
+      msg.textContent = 'Şifreni tekrar gir';
+      msg.className = 'pin-msg';
+      return;
+    }
+    if (code !== first) {
+      first = null;
+      pad.shake();
+      pad.reset();
+      msg.textContent = 'Şifreler uyuşmadı. Yeni şifreni baştan gir.';
+      msg.className = 'pin-msg bad';
+      return;
+    }
+    try { await setPin(code); } catch (e) { toast('Şifre kaydedilemedi.'); return; }
+    closeSheet();
+    toast(changing ? 'Şifre değiştirildi' : 'Şifre kilidi açıldı');
+  });
+  openSheet(changing ? 'Yeni şifre' : 'Şifre belirle', h('div', { class: 'pin-box in-sheet' }, msg, pad.el,
+    h('p', { class: 'hint pin-hint' }, 'Şifreni unutursan kilidi açmanın tek yolu kayıtları silmek. Önce yedek al.')));
+}
+
 /* ---------- install guide (iPhone Safari) ---------- */
 function setupGate() {
   const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -2772,7 +2989,13 @@ function wire() {
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheetEl) closeSheet(); });
   let rt = null;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (S.tab === 'ozet') drawChartSoon(); }, 120); });
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) { applySalary(); render(); refreshPrices(false); } });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { lockOnHide(); return; }
+    lockOnShow();
+    applySalary();
+    render();
+    refreshPrices(false);
+  });
   if (lightQuery && lightQuery.addEventListener) {
     lightQuery.addEventListener('change', () => { if (themePref() === 'oto') { applyTheme(); render(); } });
   }
@@ -2796,6 +3019,8 @@ function boot() {
   wire();
   applySalary();
   render();
+  if (pinConfig()) showLock();
+  else document.documentElement.classList.remove('pin-on');
   refreshPrices(false);
   setInterval(() => { if (!document.hidden) refreshPrices(false); }, 5 * 60 * 1000);
   setupUpdates();
