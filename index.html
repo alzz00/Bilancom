@@ -464,6 +464,10 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .goal-empty .ico { width: 56px; height: 56px; border-radius: 17px; }
 .goal-empty .ico svg.i { width: 28px; height: 28px; }
 .pick-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.opt.ex svg.i { display: none; }
+.opt.ex[aria-checked="true"] { border-color: var(--debt); background: var(--debt-soft); color: var(--ink); }
+.opt.ex[aria-checked="true"] svg.i { display: block; width: 16px; height: 16px; stroke-width: 2.4; color: var(--debt); }
+.opt.ex[aria-checked="true"] .badge { text-decoration: line-through; }
 
 /* bulk update sheet */
 .bulk-intro { margin: 8px 0 0; font-size: 14.5px; color: var(--ink-3); }
@@ -718,7 +722,7 @@ const fxOf = code => FX.find(f => f.code === code) || null;
 const goldOf = code => GOLD.find(g => g.code === code) || null;
 const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
 
-const APP_VERSION = '2026.09.27-1648';
+const APP_VERSION = '2026.09.27-1708';
 const KEY = 'hd.defter.v1';
 const PKEY = 'hd.fiyat.v1';
 const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
@@ -911,6 +915,7 @@ function cleanGoal(o) {
     target: Math.max(0, num(o.target)),
     source: o.source === 'secili' ? 'secili' : 'net',
     assetIds: Array.isArray(o.assetIds) ? o.assetIds.filter(x => typeof x === 'string').slice(0, 60) : [],
+    excludeIds: Array.isArray(o.excludeIds) ? o.excludeIds.filter(x => typeof x === 'string').slice(0, 60) : [],
     deadline: typeof o.deadline === 'string' && /^\d{4}-\d{2}$/.test(o.deadline) ? o.deadline : null,
     createdAt: num(o.createdAt), updatedAt: num(o.updatedAt),
   };
@@ -1578,10 +1583,15 @@ function debtRow(x) {
 }
 
 /* goals tab */
-// A goal counts net savings, or only the assets picked for it. A deadline turns what is left into a monthly amount.
+// A goal counts net savings minus any assets left out, or only the assets picked for it.
+// A deadline turns what is left into a monthly amount.
+function goalCounted(g, assets, t) {
+  if (g.source === 'secili') return sum(assets.filter(a => g.assetIds.includes(a.id)).map(assetValue));
+  return t.net - sum(assets.filter(a => g.excludeIds.includes(a.id)).map(assetValue));
+}
 function goalProgress(g, d, t) {
   const picked = d.assets.filter(a => g.assetIds.includes(a.id));
-  const cur = Math.max(0, g.source === 'secili' ? sum(picked.map(assetValue)) : t.net);
+  const cur = Math.max(0, goalCounted(g, d.assets, t));
   const left = Math.max(0, g.target - cur);
   let months = null, when = null;
   if (g.deadline) {
@@ -1592,6 +1602,7 @@ function goalProgress(g, d, t) {
   }
   return {
     cur, left, months, when, picked: picked.length,
+    excluded: g.source === 'net' ? d.assets.filter(a => g.excludeIds.includes(a.id)).length : 0,
     done: g.target > 0 && cur >= g.target,
     pct: g.target > 0 ? Math.min(1, cur / g.target) : 0,
     monthly: months > 0 ? left / months : null,
@@ -1638,6 +1649,7 @@ function goalCard(g, p) {
     if (p.when) lines.push(h('span', null, p.months > 0 ? `${p.when} için ayda ${money(p.monthly)}` : p.months === 0 ? `Son ay: ${p.when}` : `Süre doldu (${p.when})`));
   }
   if (g.source === 'secili') lines.push(h('span', null, p.picked ? `Seçtiğin ${p.picked} varlık` : 'Seçili varlık kalmadı'));
+  else if (p.excluded) lines.push(h('span', null, `${p.excluded} varlık hariç`));
   return h('button', { class: 'card goal', type: 'button', onclick: () => openGoal(g) },
     ring(p.pct, p.done),
     h('span', { class: 'goal-main' },
@@ -2111,28 +2123,46 @@ function openPayment(x) {
 
 function openGoal(g) {
   const isNew = !g;
-  const st = { icon: g ? g.icon : 'ev', source: g ? g.source : 'net', ids: new Set(g ? g.assetIds : []) };
+  const st = {
+    icon: g ? g.icon : 'ev', source: g ? g.source : 'net',
+    ids: new Set(g ? g.assetIds : []), ex: new Set(g ? g.excludeIds : []),
+  };
   const title = h('input', { class: 'input', id: 'g-title', maxlength: 60, autocomplete: 'off', placeholder: goalIcon(st.icon).ph, value: g ? g.title : null });
   const target = moneyInput('g-target', g ? g.target : null);
   const assets = S.data.assets.slice().sort((a, b) => assetValue(b) - assetValue(a));
+  const t = totals(S.data.assets, S.data.debts);
 
   const srcHint = h('div', { class: 'hint' });
   const pickBox = h('div');
+  const counted = h('div', { class: 'preview', 'aria-live': 'polite' });
+  const drawCounted = () => {
+    const v = goalCounted({ source: st.source, assetIds: [...st.ids], excludeIds: [...st.ex] }, assets, t);
+    counted.replaceChildren(h('span', null, 'Bu hedefe sayılan: '), h('strong', null, money(Math.max(0, v))));
+  };
+  // One chip per asset. Picked chips are highlighted; left-out chips turn red with a cross.
+  const chips = (set, leaveOut, label) => h('div', { class: 'pick-list', role: 'group', 'aria-label': label }, assets.map(a => {
+    const b = h('button', {
+      class: 'opt' + (leaveOut ? ' ex' : ''), type: 'button', role: 'checkbox', 'aria-checked': String(set.has(a.id)),
+      onclick: () => {
+        if (set.has(a.id)) set.delete(a.id); else set.add(a.id);
+        b.setAttribute('aria-checked', String(set.has(a.id)));
+        drawCounted();
+      },
+    }, leaveOut ? icon('close') : null, a.title, h('span', { class: 'badge' }, '₺' + compact(assetValue(a))));
+    return b;
+  }));
   const drawSource = () => {
-    srcHint.textContent = st.source === 'net' ? 'Tüm varlıkların eksi borçların.' : 'Sadece seçtiğin varlıklar sayılır.';
-    if (st.source !== 'secili') { pickBox.replaceChildren(); return; }
-    pickBox.replaceChildren(field('Hangi varlıklar?', assets.length
-      ? h('div', { class: 'pick-list', role: 'group', 'aria-label': 'Hedefe sayılacak varlıklar' }, assets.map(a => {
-        const b = h('button', {
-          class: 'opt', type: 'button', role: 'checkbox', 'aria-checked': String(st.ids.has(a.id)),
-          onclick: () => {
-            if (st.ids.has(a.id)) st.ids.delete(a.id); else st.ids.add(a.id);
-            b.setAttribute('aria-checked', String(st.ids.has(a.id)));
-          },
-        }, a.title, h('span', { class: 'badge' }, '₺' + compact(assetValue(a))));
-        return b;
-      }))
-      : h('p', { class: 'empty-note' }, 'Henüz varlık yok. Önce Varlıklar’dan ekle.')));
+    const net = st.source === 'net';
+    srcHint.textContent = net ? 'Tüm varlıkların eksi borçların.' : 'Sadece seçtiğin varlıklar sayılır.';
+    if (!assets.length) {
+      pickBox.replaceChildren(...(net ? [] : [h('p', { class: 'empty-note' }, 'Henüz varlık yok. Önce Varlıklar’dan ekle.')]));
+    } else if (net) {
+      pickBox.replaceChildren(field('Hariç tut', chips(st.ex, true, 'Bu hedefe sayılmayacak varlıklar'), null,
+        'İsteğe bağlı. Dokunduğun varlık bu hedefe sayılmaz; örneğin evin ya da araban.'));
+    } else {
+      pickBox.replaceChildren(field('Hangi varlıklar?', chips(st.ids, false, 'Hedefe sayılacak varlıklar')));
+    }
+    drawCounted();
   };
 
   // Month and year pick the deadline together; choosing one fills in a sensible other.
@@ -2167,6 +2197,7 @@ function openGoal(g) {
         v => { st.source = v; err.textContent = ''; drawSource(); }, 'wide'),
       srcHint),
     pickBox,
+    counted,
     field('Ne zamana kadar?', h('div', { class: 'pair' },
       h('div', { class: 'sel' }, mSel, icon('chev')),
       h('div', { class: 'sel' }, ySel, icon('chev'))), 'g-month', 'İsteğe bağlı. Seçersen her ay ne kadar ayırman gerektiğini gösterir.'),
@@ -2187,6 +2218,7 @@ function openGoal(g) {
     const item = {
       id: g ? g.id : newId(), title: title.value.trim() || goalIcon(st.icon).title, icon: st.icon,
       target: round2(tv), source: st.source, assetIds: st.source === 'secili' ? ids : [],
+      excludeIds: st.source === 'net' ? assets.filter(a => st.ex.has(a.id)).map(a => a.id) : [],
       deadline: mSel.value && ySel.value ? `${ySel.value}-${pad(Number(mSel.value))}` : null,
       createdAt: (g && g.createdAt) || at, updatedAt: at,
     };
