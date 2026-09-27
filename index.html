@@ -1,0 +1,1789 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hesap Defterim</title>
+<meta name="description" content="Varlıklarını, borçlarını ve birikimini tutan kişisel defter. Veriler yalnızca bu cihazda saklanır.">
+<meta name="theme-color" content="#EDF1EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1413" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Defterim">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="ikonlar/ikon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="ikonlar/ikon-192.png">
+<style>
+:root {
+  --bg: #EDF1EE;
+  --surface: #FAFBFA;
+  --surface-2: #E4E9E6;
+  --ink: #18202B;
+  --ink-2: #485361;
+  --ink-3: #5E6975;
+  --line: #DAE0DC;
+  --accent: #1666AA;
+  --accent-ink: #F6F8FC;
+  --accent-soft: #DCE8F4;
+  --debt: #BE4932;
+  --debt-soft: #F6E1DB;
+  --good: #1E6B3A;
+  --good-soft: #DDEFE2;
+  --warn: #7F5600;
+  --warn-soft: #F8EACB;
+  --crit: #A3302A;
+  --crit-soft: #F7DEDB;
+  --crit-ink: #FFF8F7;
+  --scrim: rgba(16, 22, 30, .45);
+  --shadow: 0 1px 2px rgba(24, 32, 43, .05), 0 10px 28px -16px rgba(24, 32, 43, .2);
+  --fab-shadow: 0 12px 26px -10px rgba(22, 102, 170, .6);
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-display: ui-rounded, "SF Pro Rounded", -apple-system, "Segoe UI Variable Display", "Segoe UI", Roboto, system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0F1413;
+    --surface: #171E1B;
+    --surface-2: #212A27;
+    --ink: #E4EAE7;
+    --ink-2: #AEB9B4;
+    --ink-3: #8C9892;
+    --line: #28312E;
+    --accent: #4E90D2;
+    --accent-ink: #0E1420;
+    --accent-soft: #1B2B3D;
+    --debt: #D3694F;
+    --debt-soft: #3A2520;
+    --good: #72C98E;
+    --good-soft: #193223;
+    --warn: #EDC063;
+    --warn-soft: #35290F;
+    --crit: #F08F86;
+    --crit-soft: #3C201E;
+    --crit-ink: #1A0B0A;
+    --scrim: rgba(0, 0, 0, .6);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3);
+    --fab-shadow: 0 12px 26px -12px rgba(0, 0, 0, .7);
+    color-scheme: dark;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: var(--bg); }
+html.locked { overflow: hidden; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-touch-callout: none; }
+:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
+svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+.app { max-width: 1000px; margin-inline: auto; padding-inline: 16px; padding-top: calc(14px + env(safe-area-inset-top, 0px)); padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
+@media (min-width: 760px) { .app { padding-inline: 28px; padding-top: 22px; padding-bottom: 120px; } }
+
+/* header */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-mark { width: 44px; height: 44px; border-radius: 14px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; flex: none; }
+.brand-name { font-family: var(--font-display); font-weight: 700; font-size: 21px; line-height: 1.1; letter-spacing: -.01em; }
+.brand-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-top: 3px; font-size: 14px; color: var(--ink-3); }
+.sync { display: inline-flex; align-items: center; gap: 6px; }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
+.sync-dot.ok { background: var(--good); }
+.sync-dot.busy { background: var(--warn); }
+.top-btns { display: flex; gap: 8px; }
+.icon-btn { width: 46px; height: 46px; flex: none; border: 0; border-radius: 14px; background: var(--surface); color: var(--ink-2); display: grid; place-items: center; box-shadow: var(--shadow); }
+.icon-btn.flat { background: var(--surface-2); box-shadow: none; width: 42px; height: 42px; border-radius: 12px; }
+
+/* tabs: bottom bar on phones, segmented control on wide screens */
+.tabs { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; display: flex; gap: 4px; background: var(--surface); border-top: 1px solid var(--line); padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px)); -webkit-user-select: none; user-select: none; }
+.tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; border: 0; border-radius: 14px; background: none; color: var(--ink-3); font-size: 13px; font-weight: 650; line-height: 1.1; }
+.tab-ico { width: 58px; height: 30px; border-radius: 999px; display: grid; place-items: center; transition: background-color .2s; }
+.tab[aria-current="page"] { color: var(--accent); }
+.tab[aria-current="page"] .tab-ico { background: var(--accent-soft); }
+.tab-add { color: var(--accent); }
+.tab-add .tab-ico { width: 48px; background: var(--accent); color: var(--accent-ink); }
+@media (min-width: 760px) {
+  .tabs { position: static; width: max-content; margin: 22px auto 0; padding: 5px; border: 0; border-radius: 999px; background: var(--surface-2); }
+  .tab { flex: none; flex-direction: row; gap: 8px; min-height: 42px; padding: 0 18px 0 12px; border-radius: 999px; font-size: 15.5px; color: var(--ink-2); }
+  .tab-ico { width: auto; height: auto; }
+  .tab[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+  .tab[aria-current="page"] .tab-ico { background: none; color: var(--accent); }
+  .tab-add { display: none; }
+}
+
+.view { margin-top: 18px; }
+@media (min-width: 760px) { .view { margin-top: 22px; } }
+
+/* banner */
+.banner { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 12px; margin-top: 16px; padding: 12px 14px; border-radius: 16px; background: var(--warn-soft); font-size: 15px; line-height: 1.4; }
+.banner p { margin: 0; flex: 1 1 220px; }
+.pill { font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 6px 10px; border-radius: 999px; background: var(--surface); color: var(--warn); }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 50px; padding: 0 20px; border: 0; border-radius: 14px; font-size: 16px; font-weight: 650; white-space: nowrap; }
+.btn svg.i { width: 20px; height: 20px; }
+.btn.sm { height: 40px; padding: 0 14px; border-radius: 12px; font-size: 15px; }
+.btn.block { width: 100%; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: transparent; color: var(--ink-2); }
+.btn.soft { background: var(--surface-2); color: var(--ink); }
+.btn.danger { background: var(--crit); color: var(--crit-ink); }
+.btn.text-danger { background: transparent; color: var(--crit); }
+.btn[disabled] { opacity: .6; cursor: default; }
+
+/* cards */
+.card { background: var(--surface); border-radius: 22px; padding: 20px; box-shadow: var(--shadow); }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.card-title { margin: 0; font-family: var(--font-display); font-weight: 650; font-size: 19px; letter-spacing: -.005em; text-wrap: balance; }
+.card-note { font-size: 14px; color: var(--ink-3); }
+.empty-note { margin: 0; padding: 4px 0; font-size: 15px; color: var(--ink-3); }
+.dash { display: grid; gap: 16px; }
+@media (min-width: 880px) {
+  .dash { grid-template-columns: 1fr 1fr; gap: 20px; }
+  .span2 { grid-column: 1 / -1; }
+}
+
+/* hero */
+.hero { display: grid; gap: 24px; padding: 22px 20px; }
+@media (min-width: 880px) { .hero { grid-template-columns: 1.15fr 1fr; align-items: center; gap: 44px; padding: 28px 32px; } }
+.hero-label { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 16px; font-weight: 600; color: var(--ink-2); }
+.hero-num { display: inline-flex; align-items: baseline; gap: 3px; max-width: 100%; margin-top: 6px; padding-bottom: 6px; border-bottom: 4px double var(--ink-3); font-size: clamp(40px, 12vw, 64px); font-weight: 650; line-height: 1.05; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.hero-num .cur, .sum-big .cur { font-size: .55em; font-weight: 600; color: var(--ink-2); letter-spacing: 0; }
+.delta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 12px; font-size: 15px; font-weight: 650; }
+.delta svg.i { width: 18px; height: 18px; stroke-width: 2.2; }
+.delta.up { color: var(--good); }
+.delta.down { color: var(--crit); }
+.delta .muted, .delta.flat { color: var(--ink-3); font-weight: 500; }
+.cmp { display: grid; gap: 18px; }
+.cmp-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.cmp-name { display: flex; align-items: center; gap: 8px; font-size: 15.5px; font-weight: 600; color: var(--ink-2); }
+.cmp-name small { font-size: 13.5px; font-weight: 500; color: var(--ink-3); }
+.cmp-val { font-size: 17px; font-weight: 650; }
+.key { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.key.asset, .bar.asset, .dbar { background: var(--accent); }
+.key.debt, .bar.debt { background: var(--debt); }
+.bar, .dbar { height: 12px; min-width: 3px; border-radius: 0 4px 4px 0; transition: width .5s cubic-bezier(.2, .7, .2, 1); }
+.dbar { height: 10px; }
+
+/* chips */
+.chip { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 999px; font-size: 13.5px; font-weight: 650; white-space: nowrap; }
+.chip svg.i { width: 15px; height: 15px; stroke-width: 2.2; }
+.chip.good { background: var(--good-soft); color: var(--good); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.crit { background: var(--crit-soft); color: var(--crit); }
+.chip.plain { background: var(--surface-2); color: var(--ink-2); }
+
+/* payments */
+.pay-sum { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; }
+.pay-big { font-size: 30px; font-weight: 650; letter-spacing: -.02em; line-height: 1.1; }
+.pay-cap { font-size: 14.5px; color: var(--ink-3); }
+.meter { height: 10px; margin: 12px 0 7px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
+.meter > div { height: 100%; border-radius: 999px; background: var(--accent); transition: width .5s; }
+.plist, .dlist, .rows, .mkt, .set-list { list-style: none; margin: 0; padding: 0; }
+.plist { margin-top: 10px; }
+.prow { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.prow:first-child { border-top: 0; }
+.chk { width: 44px; height: 44px; flex: none; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; margin-left: -8px; }
+.chk span { width: 26px; height: 26px; display: grid; place-items: center; border: 2px solid var(--ink-3); border-radius: 50%; color: transparent; transition: background-color .15s, border-color .15s; }
+.chk span svg.i { width: 17px; height: 17px; stroke-width: 2.6; }
+.chk[aria-pressed="true"] span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.pmain { flex: 1; min-width: 0; }
+.pname { font-size: 16px; font-weight: 650; overflow-wrap: anywhere; }
+.psub { font-size: 14px; color: var(--ink-3); }
+.pright { display: grid; justify-items: end; gap: 4px; }
+.pamt { font-size: 16.5px; font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.prow.paid .pmain, .prow.paid .pamt { opacity: .55; }
+.prow.paid .pamt { text-decoration: line-through; }
+
+/* distribution */
+.dlist { display: grid; gap: 14px; }
+.drow-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.dname { flex: 1; min-width: 0; font-size: 15.5px; font-weight: 600; }
+.dval { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dpct { width: 44px; text-align: right; font-size: 14px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.mini-ico { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 10px; background: var(--accent-soft); color: var(--accent); }
+.mini-ico svg.i { width: 18px; height: 18px; }
+
+/* market prices */
+.mkt li { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); }
+.mkt li:first-child { border-top: 0; }
+.mkt .n { flex: 1; min-width: 0; font-weight: 600; }
+.mkt .n small { display: block; font-size: 13.5px; font-weight: 500; color: var(--ink-3); }
+.mkt .p { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mkt .c { width: 74px; text-align: right; font-size: 14px; font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mkt .c.up { color: var(--good); }
+.mkt .c.down { color: var(--crit); }
+.mkt .c.flat { color: var(--ink-3); }
+.round-btn { width: 38px; height: 38px; display: grid; place-items: center; border: 0; border-radius: 12px; background: var(--surface-2); color: var(--ink-2); }
+.round-btn svg.i { width: 19px; height: 19px; }
+.round-btn.spin svg.i { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* trend chart */
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
+.chart svg:focus-visible { outline-offset: 4px; border-radius: 8px; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .zero { stroke: var(--ink-3); stroke-width: 1; opacity: .55; }
+.chart .ax { fill: var(--ink-3); font-family: var(--font-ui); font-size: 12.5px; font-weight: 500; }
+.chart .area { fill: var(--accent); fill-opacity: .1; stroke: none; }
+.chart .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.chart .endlbl { fill: var(--ink); font-family: var(--font-ui); font-size: 14px; font-weight: 700; }
+.chart .cross { stroke: var(--ink-3); stroke-width: 1; }
+.tip { position: absolute; z-index: 2; min-width: 150px; padding: 8px 12px; transform: translateX(-50%); border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); font-size: 13.5px; pointer-events: none; }
+.tip-m { font-weight: 600; color: var(--ink-3); }
+.tip-v { font-size: 18px; font-weight: 700; }
+.tip-r { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.link-btn { height: 34px; padding: 0 13px; border: 0; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); font-size: 14px; font-weight: 650; }
+.link-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--ink); }
+.tbl-wrap { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+.tbl th, .tbl td { padding: 9px 6px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl th { font-size: 13.5px; font-weight: 600; color: var(--ink-3); }
+
+/* list tabs */
+.list-wrap { max-width: 680px; margin-inline: auto; display: grid; gap: 16px; }
+.sum-card { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.sum-label { font-size: 15.5px; font-weight: 600; color: var(--ink-2); }
+.sum-big { display: flex; align-items: baseline; gap: 3px; font-size: 36px; font-weight: 650; letter-spacing: -.02em; line-height: 1.15; }
+.sum-sub { margin-top: 4px; font-size: 15px; color: var(--ink-2); }
+.rows-card { padding-block: 6px; }
+.row { width: 100%; min-height: 70px; display: flex; align-items: center; gap: 14px; padding: 13px 0; border: 0; border-top: 1px solid var(--line); background: none; text-align: left; }
+.rows > li:first-child > .row { border-top: 0; }
+.ico { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 14px; background: var(--accent-soft); color: var(--accent); }
+.ico.debt { background: var(--debt-soft); color: var(--debt); }
+.ico svg.i { width: 22px; height: 22px; }
+.rmain { flex: 1; min-width: 0; }
+.rtitle { display: block; font-size: 16.5px; font-weight: 650; line-height: 1.3; overflow-wrap: anywhere; }
+.rsub { display: block; margin-top: 2px; font-size: 14px; color: var(--ink-3); }
+.ramt { text-align: right; font-size: 17px; font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ramt small { display: block; font-size: 13.5px; font-weight: 500; color: var(--ink-3); }
+.group { padding-top: 12px; }
+.group + .group { border-top: 1px solid var(--line); margin-top: 4px; }
+.group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 4px 0 2px; }
+.group-name { font-family: var(--font-display); font-size: 17.5px; font-weight: 650; overflow-wrap: anywhere; }
+.group-total { font-weight: 650; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* floating add button (wide screens; phones use "Ekle" in the bottom bar) */
+.fab { display: none; position: fixed; z-index: 31; bottom: 28px; right: max(28px, calc((100vw - 1000px) / 2 + 28px)); width: 60px; height: 60px; place-items: center; border: 0; border-radius: 20px; background: var(--accent); color: var(--accent-ink); box-shadow: var(--fab-shadow); }
+.fab svg.i { width: 28px; height: 28px; stroke-width: 2.2; }
+@media (min-width: 760px) { .fab { display: grid; } }
+
+/* toast */
+.toast { position: fixed; z-index: 90; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); width: max-content; max-width: min(420px, calc(100% - 32px)); padding: 12px 16px; border-radius: 14px; background: var(--ink); color: var(--bg); font-size: 15px; font-weight: 600; box-shadow: var(--shadow); opacity: 0; transform: translate(-50%, 8px); transition: opacity .2s, transform .2s; pointer-events: none; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+@media (min-width: 760px) { .toast { bottom: 32px; } }
+
+/* sheet */
+.scrim { position: fixed; z-index: 50; inset: 0; display: flex; align-items: flex-end; justify-content: center; background: var(--scrim); animation: fade .18s ease-out; }
+.sheet { width: 100%; max-width: 540px; max-height: 92vh; max-height: 92dvh; overflow-y: auto; overscroll-behavior: contain; padding: 4px 20px calc(22px + env(safe-area-inset-bottom, 0px)); border-radius: 26px 26px 0 0; background: var(--surface); box-shadow: 0 -12px 40px rgba(0, 0, 0, .18); animation: rise .24s cubic-bezier(.2, .8, .2, 1); }
+.sheet:focus { outline: none; }
+.grab { width: 42px; height: 5px; margin: 6px auto 6px; border-radius: 999px; background: var(--line); }
+@media (min-width: 760px) {
+  .scrim { align-items: center; padding: 24px; }
+  .sheet { padding: 12px 28px 28px; border-radius: 26px; }
+  .grab { display: none; }
+}
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0 2px; }
+.sheet-title { margin: 0; font-family: var(--font-display); font-size: 22px; font-weight: 700; }
+.sheet-text { margin: 12px 0 0; font-size: 15.5px; color: var(--ink-2); }
+@keyframes rise { from { transform: translateY(28px); opacity: .5; } to { transform: none; opacity: 1; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* forms */
+.field { display: grid; gap: 8px; margin-top: 18px; min-width: 0; }
+.lbl { font-size: 15px; font-weight: 650; color: var(--ink-2); }
+.hint { font-size: 13.5px; color: var(--ink-3); }
+.input { width: 100%; height: 54px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--bg); color: var(--ink); font-size: 17px; font-weight: 500; }
+.input::placeholder { color: var(--ink-3); opacity: .75; }
+.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.money, .qty { position: relative; }
+.money > span { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 20px; font-weight: 650; color: var(--ink-3); pointer-events: none; }
+.money .input { padding-left: 36px; font-size: 21px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.qty .suffix { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 17px; font-weight: 650; color: var(--ink-3); pointer-events: none; }
+.qty .input { padding-right: 72px; font-size: 21px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.preview { margin-top: 10px; padding: 11px 14px; border-radius: 14px; background: var(--accent-soft); font-size: 15px; color: var(--ink-2); }
+.preview strong { color: var(--ink); font-size: 17px; }
+.sel { position: relative; }
+.sel select { appearance: none; -webkit-appearance: none; padding-right: 44px; cursor: pointer; }
+.sel svg.i { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+@media (max-width: 400px) { .two { grid-template-columns: 1fr; } }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.opt { display: inline-flex; align-items: center; gap: 7px; height: 44px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink-2); font-size: 15px; font-weight: 600; }
+.opt.has-ico { padding-left: 11px; }
+.opt svg.i { width: 19px; height: 19px; }
+.opt .badge { color: var(--ink-3); font-weight: 650; }
+.opt[aria-checked="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+.opt[aria-checked="true"] svg.i { color: var(--accent); }
+.seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface-2); max-width: 100%; }
+.seg button { height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: none; color: var(--ink-2); font-size: 15px; font-weight: 650; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.err { margin-top: 14px; font-size: 14.5px; font-weight: 600; color: var(--crit); }
+.err:empty { display: none; }
+.sheet-actions { display: grid; gap: 10px; margin-top: 24px; }
+.confirm { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 12px 14px; border-radius: 14px; background: var(--crit-soft); }
+.confirm p { margin: 0; font-weight: 650; color: var(--crit); }
+.confirm-btns { display: flex; gap: 8px; }
+.choose { display: grid; gap: 12px; margin-top: 16px; }
+.choice { display: flex; align-items: center; gap: 14px; padding: 16px; border: 1.5px solid var(--line); border-radius: 18px; background: var(--surface); text-align: left; }
+.choice .ico { width: 52px; height: 52px; border-radius: 16px; }
+.choice strong { display: block; font-size: 17px; }
+.choice .s { display: block; font-size: 14.5px; color: var(--ink-3); }
+
+/* settings */
+.set-list { margin-top: 12px; }
+.set-row { width: 100%; display: flex; align-items: center; gap: 14px; padding: 14px 0; border: 0; border-top: 1px solid var(--line); background: none; text-align: left; }
+.set-list > li:first-child > .set-row { border-top: 0; }
+.set-row .ico { width: 42px; height: 42px; border-radius: 13px; }
+.set-row strong { display: block; font-size: 16.5px; }
+.set-row .s { display: block; font-size: 14px; color: var(--ink-3); }
+.set-row.danger strong { color: var(--crit); }
+.set-row.danger .ico { background: var(--crit-soft); color: var(--crit); }
+.note-box { display: flex; gap: 12px; margin-top: 16px; padding: 14px; border-radius: 16px; background: var(--surface-2); font-size: 14.5px; color: var(--ink-2); }
+.note-box svg.i { color: var(--accent); }
+
+/* install guide for Safari */
+.gate { position: fixed; z-index: 80; inset: 0; overflow-y: auto; background: var(--bg); padding: calc(28px + env(safe-area-inset-top, 0px)) 20px calc(28px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: center; }
+.gate-card { width: 100%; max-width: 440px; margin: auto 0; }
+.gate .brand-mark { width: 64px; height: 64px; border-radius: 18px; }
+.gate .brand-mark svg.i { width: 34px; height: 34px; }
+.gate h1 { margin: 18px 0 8px; font-family: var(--font-display); font-size: 27px; line-height: 1.15; text-wrap: balance; }
+.gate p { margin: 0; font-size: 16px; color: var(--ink-2); }
+.steps { list-style: none; margin: 22px 0 18px; padding: 0; display: grid; gap: 12px; }
+.steps li { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 18px; background: var(--surface); box-shadow: var(--shadow); font-size: 16px; }
+.steps b { font-weight: 700; }
+.step-ico { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 13px; background: var(--accent-soft); color: var(--accent); }
+
+.loading { padding: 64px 0; text-align: center; font-size: 16px; color: var(--ink-3); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg class="i" viewBox="0 0 24 24"><path d="M3 5.8c3-1.1 6-1 9 .9 3-1.9 6-2 9-.9v12.6c-3-1.1-6-1-9 .9-3-1.9-6-2-9-.9z"/><path d="M12 6.7v12.6"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">Hesap Defterim</div>
+        <div class="brand-meta">
+          <span id="today"></span>
+          <span class="sync"><span class="sync-dot" id="syncDot"></span><span id="sync"></span></span>
+        </div>
+      </div>
+    </div>
+    <div class="top-btns">
+      <button class="icon-btn" id="hideBtn" type="button" aria-pressed="false" aria-label="Tutarları gizle" title="Tutarları gizle"></button>
+      <button class="icon-btn" id="setBtn" type="button" aria-label="Ayarlar ve yedek" title="Ayarlar ve yedek"></button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs" aria-label="Bölümler">
+    <button class="tab" type="button" data-tab="ozet" aria-current="page">
+      <span class="tab-ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="8.5" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="5" rx="1.8"/><rect x="13.5" y="11.5" width="7" height="9" rx="1.8"/><rect x="3.5" y="15" width="7" height="5.5" rx="1.8"/></svg></span>
+      <span>Özet</span>
+    </button>
+    <button class="tab" type="button" data-tab="varlik">
+      <span class="tab-ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 7.4h14.3a1.6 1.6 0 0 1 1.6 1.6v9.3a1.6 1.6 0 0 1-1.6 1.6H5.8a1.6 1.6 0 0 1-1.6-1.6z"/><path d="M4.2 7.4 15.4 4.3v3.1"/><path d="M16.2 13.7h.01"/></svg></span>
+      <span>Varlıklar</span>
+    </button>
+    <button class="tab" type="button" data-tab="borc">
+      <span class="tab-ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.8" y="5.5" width="18.4" height="13" rx="2.2"/><path d="M2.8 9.8h18.4"/><path d="M6.5 15h3.5"/></svg></span>
+      <span>Borçlar</span>
+    </button>
+    <button class="tab tab-add" id="navAdd" type="button" aria-label="Yeni kayıt ekle">
+      <span class="tab-ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
+      <span>Ekle</span>
+    </button>
+  </nav>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <main class="view" id="view" role="tabpanel">
+    <div class="loading">Defterin açılıyor…</div>
+  </main>
+
+  <button class="fab" id="fab" type="button" aria-label="Yeni kayıt ekle" title="Yeni kayıt ekle">
+    <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <datalist id="bank-list">
+    <option value="Akbank"></option><option value="Albaraka Türk"></option><option value="DenizBank"></option>
+    <option value="Emlak Katılım"></option><option value="Enpara"></option><option value="Fibabanka"></option>
+    <option value="Garanti BBVA"></option><option value="Halkbank"></option><option value="HSBC"></option>
+    <option value="ING"></option><option value="İş Bankası"></option><option value="Kuveyt Türk"></option>
+    <option value="Odeabank"></option><option value="Papara"></option><option value="QNB"></option>
+    <option value="Şekerbank"></option><option value="TEB"></option><option value="Türkiye Finans"></option>
+    <option value="VakıfBank"></option><option value="Vakıf Katılım"></option><option value="Yapı Kredi"></option>
+    <option value="Ziraat Bankası"></option><option value="Ziraat Katılım"></option>
+  </datalist>
+</div>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-card">
+    <div class="brand-mark" aria-hidden="true">
+      <svg class="i" viewBox="0 0 24 24"><path d="M3 5.8c3-1.1 6-1 9 .9 3-1.9 6-2 9-.9v12.6c-3-1.1-6-1-9 .9-3-1.9-6-2-9-.9z"/><path d="M12 6.7v12.6"/></svg>
+    </div>
+    <h1>Hesap Defterim'i ana ekrana ekle</h1>
+    <p>Uygulama gibi açılır ve internet yokken de çalışır. Verilerin yalnızca bu telefonda saklanır.</p>
+    <ol class="steps">
+      <li>
+        <span class="step-ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14.5V3.5M8 7.2l4-3.7 4 3.7"/><path d="M8.5 10.5H6.8A1.8 1.8 0 0 0 5 12.3v6.9A1.8 1.8 0 0 0 6.8 21h10.4a1.8 1.8 0 0 0 1.8-1.8v-6.9a1.8 1.8 0 0 0-1.8-1.8h-1.7"/></svg></span>
+        <span>Safari'de <b>Paylaş</b> düğmesine dokun. Göremiyorsan önce <b>•••</b> menüsünü aç.</span>
+      </li>
+      <li>
+        <span class="step-ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span>
+        <span>Listeden <b>Ana Ekrana Ekle</b>'yi seç, sonra <b>Ekle</b>'ye dokun.</span>
+      </li>
+      <li>
+        <span class="step-ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.8c3-1.1 6-1 9 .9 3-1.9 6-2 9-.9v12.6c-3-1.1-6-1-9 .9-3-1.9-6-2-9-.9z"/><path d="M12 6.7v12.6"/></svg></span>
+        <span>Ana ekrandaki <b>Defterim</b> simgesinden aç. Hep oradan kullan.</span>
+      </li>
+    </ol>
+    <button class="btn ghost block" id="gateSkip" type="button">Şimdilik Safari'de dene</button>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const AY = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+const AYK = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+const GUN = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+
+const ICONS = {
+  cash: '<rect x="2.8" y="6.2" width="18.4" height="11.6" rx="2.2"/><circle cx="12" cy="12" r="2.6"/><path d="M6.3 12h.01M17.7 12h.01"/>',
+  bank: '<path d="M3.5 9.3 12 4.5l8.5 4.8"/><path d="M5.5 10.5v6.5M10 10.5v6.5M14 10.5v6.5M18.5 10.5v6.5"/><path d="M3.5 19.5h17"/>',
+  gold: '<path d="M3.5 18 6.6 9.5h10.8l3.1 8.5z"/><path d="M9 9.5l1-3h4l1 3"/>',
+  fx: '<path d="M6 8h12.5l-3-3"/><path d="M18 16H5.5l3 3"/>',
+  invest: '<path d="M4 17.5l5-5 3.5 3 7-7.5"/><path d="M15 8h4.5v4.5"/>',
+  house: '<path d="M4 11.2 12 4.8l8 6.4"/><path d="M6.2 9.8v9.7h11.6V9.8"/><path d="M10.2 19.5v-5h3.6v5"/>',
+  car: '<path d="M3.8 15.8v-3.4l2-4.3a1.8 1.8 0 0 1 1.6-1h9.2a1.8 1.8 0 0 1 1.6 1l2 4.3v3.4z"/><path d="M3.8 12.4h16.4"/><circle cx="7.6" cy="17.4" r="1.7"/><circle cx="16.4" cy="17.4" r="1.7"/>',
+  other: '<circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/>',
+  card: '<rect x="2.8" y="5.5" width="18.4" height="13" rx="2.2"/><path d="M2.8 9.8h18.4"/><path d="M6.5 15h3.5"/>',
+  loan: '<path d="M7 3.8h7l4 4v12.4H7z"/><path d="M14 3.8v4h4"/><path d="M10 12.2h5M10 15.6h5"/>',
+  kmh: '<rect x="3" y="5.5" width="18" height="13" rx="2.2"/><path d="M8.5 12h7"/>',
+  person: '<circle cx="12" cy="8.2" r="3.4"/><path d="M5.2 19.6c.9-3.5 3.6-5.4 6.8-5.4s5.9 1.9 6.8 5.4"/>',
+  wallet: '<path d="M4.2 7.4h14.3a1.6 1.6 0 0 1 1.6 1.6v9.3a1.6 1.6 0 0 1-1.6 1.6H5.8a1.6 1.6 0 0 1-1.6-1.6z"/><path d="M4.2 7.4 15.4 4.3v3.1"/><path d="M16.2 13.7h.01"/>',
+  eye: '<path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',
+  eyeOff: '<path d="M2.5 12S6 5.8 12 5.8c1.7 0 3.2.5 4.5 1.2M21.5 12s-1.2 2.2-3.5 3.9M9.5 17.8c.8.3 1.6.4 2.5.4"/><path d="M4 4l16 16"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.4 7.4 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.4 7.4 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 2.6-1.5l2.4 1 2-3.4z"/>',
+  refresh: '<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4h-4"/>',
+  download: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4.5 19.5h15"/>',
+  upload: '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4.5 19.5h15"/>',
+  trash: '<path d="M4.5 7h15M9.5 7V4.8h5V7M6.5 7l.8 12.2a1.5 1.5 0 0 0 1.5 1.3h6.4a1.5 1.5 0 0 0 1.5-1.3L17.5 7"/>',
+  info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8h.01"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  close: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+  check: '<path d="M5.5 12.5l4.2 4.2L18.5 8"/>',
+  clock: '<circle cx="12" cy="12" r="8.2"/><path d="M12 7.8V12l2.8 1.8"/>',
+  alert: '<path d="M12 4.2 20.8 19.3H3.2z"/><path d="M12 10v4.2M12 16.9h.01"/>',
+  up: '<path d="M12 18.5V6M6.5 11.5 12 6l5.5 5.5"/>',
+  down: '<path d="M12 5.5V18M6.5 12.5 12 18l5.5-5.5"/>',
+  chev: '<path d="M7 10l5 5 5-5"/>',
+};
+
+const AK = [
+  { id: 'banka', label: 'Banka', icon: 'bank', mode: 'tl' },
+  { id: 'nakit', label: 'Nakit', icon: 'cash', mode: 'tl' },
+  { id: 'doviz', label: 'Döviz', icon: 'fx', mode: 'fx' },
+  { id: 'altin', label: 'Altın', icon: 'gold', mode: 'gold' },
+  { id: 'yatirim', label: 'Yatırım', icon: 'invest', mode: 'inv' },
+  { id: 'ev', label: 'Ev / arsa', icon: 'house', mode: 'tl' },
+  { id: 'arac', label: 'Araç', icon: 'car', mode: 'tl' },
+  { id: 'diger', label: 'Diğer', icon: 'other', mode: 'tl' },
+];
+const DK = [
+  { id: 'kart', label: 'Kredi kartı', icon: 'card', pay: 'Asgari ödeme', short: 'asgari' },
+  { id: 'kredi', label: 'Kredi', icon: 'loan', pay: 'Aylık taksit', short: 'taksit' },
+  { id: 'kmh', label: 'KMH / ek hesap', icon: 'kmh', pay: 'Asgari ödeme', short: 'asgari' },
+  { id: 'kisi', label: 'Kişiye borç', icon: 'person', pay: 'Aylık ödeme', short: 'aylık' },
+  { id: 'diger', label: 'Diğer', icon: 'other', pay: 'Aylık ödeme', short: 'aylık' },
+];
+const FX = [
+  { code: 'USD', label: 'Dolar', sym: '$' },
+  { code: 'EUR', label: 'Euro', sym: '€' },
+  { code: 'GBP', label: 'Sterlin', sym: '£' },
+  { code: 'CHF', label: 'İsviçre frangı', sym: 'CHF' },
+  { code: 'SAR', label: 'Suudi riyali', sym: 'SAR' },
+  { code: 'AED', label: 'BAE dirhemi', sym: 'AED' },
+  { code: 'CAD', label: 'Kanada doları', sym: 'CAD' },
+  { code: 'AUD', label: 'Avustralya doları', sym: 'AUD' },
+  { code: 'JPY', label: 'Japon yeni', sym: '¥' },
+  { code: 'RUB', label: 'Rus rublesi', sym: '₽' },
+];
+const GOLD = [
+  { code: 'GRA', label: 'Gram', title: 'Gram altın', unit: 'gram' },
+  { code: 'CEYREKALTIN', label: 'Çeyrek', title: 'Çeyrek altın', unit: 'adet' },
+  { code: 'YARIMALTIN', label: 'Yarım', title: 'Yarım altın', unit: 'adet' },
+  { code: 'TAMALTIN', label: 'Tam', title: 'Tam altın', unit: 'adet' },
+  { code: 'CUMHURIYETALTINI', label: 'Cumhuriyet', title: 'Cumhuriyet altını', unit: 'adet' },
+  { code: 'ATAALTIN', label: 'Ata', title: 'Ata altın', unit: 'adet' },
+  { code: 'RESATALTIN', label: 'Reşat', title: 'Reşat altın', unit: 'adet' },
+  { code: 'GREMSEALTIN', label: 'Gremse', title: 'Gremse altın', unit: 'adet' },
+  { code: 'BESLIALTIN', label: 'Beşli', title: 'Beşli altın', unit: 'adet' },
+  { code: 'YIA', label: '22 ayar bilezik', title: '22 ayar bilezik', unit: 'gram' },
+  { code: '18AYARALTIN', label: '18 ayar', title: '18 ayar altın', unit: 'gram' },
+  { code: '14AYARALTIN', label: '14 ayar', title: '14 ayar altın', unit: 'gram' },
+  { code: 'HAS', label: 'Has altın', title: 'Has altın', unit: 'gram' },
+  { code: 'GUMUS', label: 'Gümüş', title: 'Gümüş', unit: 'gram' },
+];
+const INV = [
+  { id: 'hisse', label: 'Hisse' },
+  { id: 'fon', label: 'Fon' },
+  { id: 'bes', label: 'BES' },
+  { id: 'kripto', label: 'Kripto' },
+  { id: 'diger', label: 'Diğer' },
+];
+const akind = id => AK.find(k => k.id === id) || AK[AK.length - 1];
+const dkind = id => DK.find(k => k.id === id) || DK[DK.length - 1];
+const fxOf = code => FX.find(f => f.code === code) || null;
+const goldOf = code => GOLD.find(g => g.code === code) || null;
+const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
+
+const KEY = 'hd.defter.v1';
+const PKEY = 'hd.fiyat.v1';
+const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
+const PRICE_TTL = 15 * 60 * 1000;
+// Used only to value the example figures before live prices arrive.
+const SAMPLE_PRICES = { USD: 48.85, EUR: 55.4, GRA: 6740, CEYREKALTIN: 10722 };
+
+const S = {
+  data: null,
+  prices: null,
+  priceLoading: false,
+  priceError: false,
+  tab: 'ozet',
+  hide: false,
+  showTable: false,
+  inSafari: false,
+  storageBlocked: false,
+  recovered: false,
+  persistAsked: false,
+};
+
+/* ---------- small helpers ---------- */
+const $ = sel => document.querySelector(sel);
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  if (props) for (const [k, v] of Object.entries(props)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kid of kids.flat(Infinity)) {
+    if (kid == null || kid === false) continue;
+    el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  }
+  return el;
+}
+function sv(tag, attrs) {
+  const el = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) if (attrs[k] != null) el.setAttribute(k, attrs[k]);
+  return el;
+}
+function icon(name) {
+  const el = document.createElementNS(SVGNS, 'svg');
+  el.setAttribute('viewBox', '0 0 24 24');
+  el.setAttribute('class', 'i');
+  el.setAttribute('aria-hidden', 'true');
+  el.innerHTML = ICONS[name] || ICONS.other;
+  return el;
+}
+const chip = (kind, ic, text) => h('span', { class: 'chip ' + kind }, ic ? icon(ic) : null, text);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const sum = arr => arr.reduce((a, b) => a + (Number.isFinite(b) ? b : 0), 0);
+const clone = o => JSON.parse(JSON.stringify(o));
+function newId() {
+  const b = new Uint8Array(10);
+  crypto.getRandomValues(b);
+  return Array.from(b, x => (x % 36).toString(36)).join('') + Date.now().toString(36).slice(-4);
+}
+
+/* ---------- numbers ---------- */
+const NF0 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
+const NF2 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 });
+const NF2F = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const NF4 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 });
+const NFC = new Intl.NumberFormat('tr-TR', { notation: 'compact', maximumFractionDigits: 1 });
+function money(v) {
+  if (S.hide) return '₺•••••';
+  const r = Math.round(v);
+  return (r < 0 ? '−' : '') + '₺' + NF0.format(Math.abs(r));
+}
+// Unit prices: two decimals, more only for currencies worth less than a lira (e.g. yen).
+function money2(v) {
+  if (S.hide) return '₺•••••';
+  return '₺' + (v >= 1 ? NF2F.format(v) : NF4.format(Math.round(v * 10000) / 10000));
+}
+function bigMoney(v, cls) {
+  const el = h('div', { class: cls });
+  const r = Math.round(v);
+  if (S.hide) { el.append(h('span', { class: 'cur' }, '₺'), '•••••'); return el; }
+  el.append(r < 0 ? '−' : '', h('span', { class: 'cur' }, '₺'), NF0.format(Math.abs(r)));
+  return el;
+}
+const compact = v => (S.hide ? '•••' : NFC.format(v));
+const fmtQty = v => (S.hide ? '•••' : NF4.format(v));
+const round2 = v => Math.round(v * 100) / 100;
+const round4 = v => Math.round(v * 10000) / 10000;
+// Accepts Turkish style ("12.500", "1.250,75"), plain ("12500") and dot decimals ("12.5").
+function parseAmount(raw) {
+  let s = String(raw == null ? '' : raw).trim().replace(/\s|₺|tl$/gi, '');
+  if (!s) return NaN;
+  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+  else if ((s.match(/\./g) || []).length > 1 || /\.\d{3}$/.test(s)) s = s.replace(/\./g, '');
+  if (!/^\d+(\.\d+)?$/.test(s)) return NaN;
+  return parseFloat(s);
+}
+// "5’i", "12’si", "30’u": Turkish possessive suffix after a day number.
+function ordinal(n) {
+  const last = n % 10;
+  const suf = last === 0 ? ({ 10: 'u', 20: 'si', 30: 'u' }[n] || 'ı')
+    : { 1: 'i', 2: 'si', 3: 'ü', 4: 'ü', 5: 'i', 6: 'sı', 7: 'si', 8: 'i', 9: 'u' }[last];
+  return n + '’' + suf;
+}
+
+/* ---------- dates ---------- */
+const pad = n => String(n).padStart(2, '0');
+const monthKey = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const today0 = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const daysIn = (y, m) => new Date(y, m + 1, 0).getDate();
+function nextDue(day, now) {
+  const t = today0(now);
+  let y = t.getFullYear(), m = t.getMonth();
+  let d = new Date(y, m, Math.min(day, daysIn(y, m)));
+  if (d < t) {
+    m += 1; if (m > 11) { m = 0; y += 1; }
+    d = new Date(y, m, Math.min(day, daysIn(y, m)));
+  }
+  return d;
+}
+const daysBetween = (a, b) => Math.round((b - a) / 86400000);
+// A payment is "paid" for one cycle: the next due date, or the month when no due day is set.
+const cycleKey = (x, now) => (x.dueDay ? isoDate(nextDue(x.dueDay, now)) : monthKey(now));
+function shortStamp(d) {
+  const now = new Date();
+  const hm = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return isoDate(d) === isoDate(now) ? hm : `${d.getDate()} ${AYK[d.getMonth()]} ${hm}`;
+}
+
+/* ---------- stored data ---------- */
+const str = (v, n) => (typeof v === 'string' ? v.slice(0, n).trim() : '');
+const num = v => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
+const ID_RE = /^[A-Za-z0-9_-]{2,40}$/;
+function defaultTitle(kind, unit) {
+  const mode = akind(kind).mode;
+  if (mode === 'fx') return (fxOf(unit) || FX[0]).label;
+  if (mode === 'gold') return (goldOf(unit) || GOLD[0]).title;
+  return 'Adsız varlık';
+}
+function cleanAsset(o) {
+  if (!o || typeof o !== 'object' || !ID_RE.test(String(o.id))) return null;
+  const kind = akind(o.kind).id;
+  const mode = akind(kind).mode;
+  let unit = typeof o.unit === 'string' ? o.unit : 'TRY';
+  if (mode === 'fx' && !fxOf(unit)) unit = 'USD';
+  if (mode === 'gold' && !goldOf(unit)) unit = 'GRA';
+  if (mode === 'tl' || (mode === 'inv' && unit !== 'MANUAL')) unit = 'TRY';
+  return {
+    id: String(o.id), kind, unit,
+    title: str(o.title, 80) || defaultTitle(kind, unit),
+    qty: Math.max(0, num(o.qty != null ? o.qty : o.amount)),
+    price: unit === 'MANUAL' ? Math.max(0, num(o.price)) : null,
+    sub: mode === 'inv' ? invOf(o.sub).id : null,
+    savedValue: Math.max(0, num(o.savedValue)),
+    createdAt: num(o.createdAt), updatedAt: num(o.updatedAt),
+  };
+}
+function cleanDebt(o) {
+  if (!o || typeof o !== 'object' || !ID_RE.test(String(o.id))) return null;
+  const dd = Math.round(num(o.dueDay));
+  return {
+    id: String(o.id), bank: str(o.bank, 60) || 'Adsız', kind: dkind(o.kind).id, note: str(o.note, 80),
+    total: Math.max(0, num(o.total)), minimum: Math.max(0, num(o.minimum)),
+    dueDay: dd >= 1 && dd <= 31 ? dd : null,
+    paidFor: typeof o.paidFor === 'string' ? o.paidFor.slice(0, 10) : null,
+    createdAt: num(o.createdAt), updatedAt: num(o.updatedAt),
+  };
+}
+function cleanHist(v) {
+  return v && typeof v === 'object' ? { assets: num(v.assets), debts: num(v.debts), net: num(v.net), monthly: num(v.monthly) } : null;
+}
+const emptyData = () => ({ v: 1, assets: [], debts: [], history: {}, lastBackup: 0, firstDataAt: 0 });
+function sanitizeData(o) {
+  const d = emptyData();
+  if (!o || typeof o !== 'object') return d;
+  d.assets = (Array.isArray(o.assets) ? o.assets : []).map(cleanAsset).filter(Boolean);
+  d.debts = (Array.isArray(o.debts) ? o.debts : []).map(cleanDebt).filter(Boolean);
+  if (o.history && typeof o.history === 'object') {
+    for (const [k, v] of Object.entries(o.history)) {
+      const c = cleanHist(v);
+      if (c && /^\d{4}-\d{2}$/.test(k)) d.history[k] = c;
+    }
+  }
+  d.lastBackup = num(o.lastBackup);
+  d.firstDataAt = num(o.firstDataAt);
+  return d;
+}
+function loadData() {
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) { S.storageBlocked = true; return emptyData(); }
+  if (!raw) return emptyData();
+  try { return sanitizeData(JSON.parse(raw)); } catch (e) {
+    // Keep the unreadable copy instead of overwriting it on the next save.
+    try { localStorage.setItem('hd.bozuk.' + Date.now(), raw); } catch (_) { /* no room */ }
+    S.recovered = true;
+    return emptyData();
+  }
+}
+function persist(next) {
+  try { localStorage.setItem(KEY, JSON.stringify(next)); return true; } catch (e) {
+    toast('Kaydedilemedi. Telefonun depolaması dolu ya da bu tarayıcıda kayıt kapalı.');
+    return false;
+  }
+}
+function askPersistence() {
+  if (S.persistAsked || !navigator.storage || !navigator.storage.persist) return;
+  S.persistAsked = true;
+  navigator.storage.persisted().then(p => p || navigator.storage.persist()).catch(() => {});
+}
+// Every change goes through here: apply to a copy, update the month's history, save, then render.
+function mutate(fn) {
+  const next = clone(S.data);
+  fn(next);
+  if ((next.assets.length || next.debts.length) && !next.firstDataAt) next.firstDataAt = Date.now();
+  recordHistory(next);
+  if (!persist(next)) return false;
+  S.data = next;
+  askPersistence();
+  render();
+  return true;
+}
+function upsert(list, item) {
+  const i = list.findIndex(x => x.id === item.id);
+  if (i >= 0) list[i] = item; else list.push(item);
+}
+
+/* ---------- values & prices ---------- */
+function priceOf(code) {
+  const p = S.prices && S.prices.items ? S.prices.items[code] : null;
+  return p && p.buy > 0 ? p.buy : null;
+}
+function assetValue(a) {
+  if (a.unit === 'TRY') return a.qty;
+  if (a.unit === 'MANUAL') return a.qty * (a.price || 0);
+  const p = priceOf(a.unit);
+  return p != null ? a.qty * p : a.savedValue || 0;
+}
+function totals(assets, debts) {
+  const a = sum(assets.map(assetValue));
+  const d = sum(debts.map(x => x.total));
+  return { assets: a, debts: d, net: a - d, monthly: sum(debts.map(x => x.minimum || 0)) };
+}
+function recordHistory(d) {
+  if (!d.assets.length && !d.debts.length && !Object.keys(d.history).length) return false;
+  const t = totals(d.assets, d.debts);
+  const key = monthKey(new Date());
+  const next = { assets: Math.round(t.assets), debts: Math.round(t.debts), net: Math.round(t.net), monthly: Math.round(t.monthly) };
+  const cur = d.history[key];
+  if (cur && cur.assets === next.assets && cur.debts === next.debts && cur.monthly === next.monthly) return false;
+  d.history[key] = next;
+  return true;
+}
+
+async function refreshPrices(force) {
+  if (S.priceLoading) return;
+  if (!force && S.prices && Date.now() - S.prices.fetchedAt < PRICE_TTL) return;
+  if (!navigator.onLine && !force) return;
+  S.priceLoading = true;
+  renderPriceBits();
+  try {
+    // The feed is served with a very long cache lifetime, so always ask past the cache.
+    const r = await fetch(PRICE_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    const items = {};
+    for (const code of [...FX.map(f => f.code), ...GOLD.map(g => g.code)]) {
+      const o = j && j[code];
+      const buy = o ? Number(o.Buying) : 0;
+      if (buy > 0) items[code] = { buy, sell: Number(o.Selling) || buy, change: Number(o.Change) || 0 };
+    }
+    if (!Object.keys(items).length) throw new Error('fiyat yok');
+    const m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/.exec((j && j.Update_Date) || '');
+    const sourceAt = m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]).getTime() : Date.now();
+    S.prices = { fetchedAt: Date.now(), sourceAt, items: { ...((S.prices && S.prices.items) || {}), ...items } };
+    try { localStorage.setItem(PKEY, JSON.stringify(S.prices)); } catch (e) { /* prices are refetched anyway */ }
+    S.priceError = false;
+    const next = clone(S.data);
+    if (recordHistory(next) && persist(next)) S.data = next;
+  } catch (e) {
+    S.priceError = true;
+  } finally {
+    S.priceLoading = false;
+    render();
+  }
+}
+
+/* ---------- example data ---------- */
+function sampleData(now) {
+  const mk = (id, kind, title, unit, qty, extra) => {
+    const a = { id, kind, title, unit, qty, price: null, sub: null, ...extra };
+    a.savedValue = unit === 'TRY' ? qty : qty * (SAMPLE_PRICES[unit] || 0);
+    return a;
+  };
+  const assets = [
+    mk('s1', 'banka', 'Vadeli hesap · Enpara', 'TRY', 120000),
+    mk('s2', 'altin', 'Düğün altınları', 'CEYREKALTIN', 6),
+    mk('s3', 'yatirim', 'BES', 'TRY', 67300, { sub: 'bes' }),
+    mk('s4', 'altin', 'Gram altın', 'GRA', 8),
+    mk('s5', 'doviz', 'Dolar birikimi', 'USD', 850),
+    mk('s6', 'banka', 'Maaş hesabı · Ziraat', 'TRY', 38500),
+    mk('s7', 'nakit', 'Cüzdan', 'TRY', 4250),
+  ];
+  const debts = [
+    { id: 't1', bank: 'Garanti BBVA', kind: 'kart', note: 'Bonus', total: 18450, minimum: 3690, dueDay: 5, paidFor: null },
+    { id: 't2', bank: 'Garanti BBVA', kind: 'kmh', note: '', total: 3100, minimum: 620, dueDay: 5, paidFor: null },
+    { id: 't3', bank: 'Yapı Kredi', kind: 'kart', note: 'World', total: 7200, minimum: 1440, dueDay: 12, paidFor: null },
+    { id: 't4', bank: 'İş Bankası', kind: 'kredi', note: 'İhtiyaç kredisi', total: 64000, minimum: 5850, dueDay: 20, paidFor: null },
+  ];
+  debts[3].paidFor = cycleKey(debts[3], now);
+  const t = totals(assets, debts);
+  const factors = [0.84, 0.86, 0.88, 0.91, 0.95];
+  const history = factors.map((f, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (factors.length - i), 1);
+    const debt = Math.round(t.debts + (factors.length - i) * 1400);
+    const net = Math.round(t.net * f);
+    return { id: monthKey(d), net, assets: net + debt, debts: debt, monthly: 11600 };
+  });
+  return { assets, debts, history, sample: true };
+}
+
+const isSample = () => !S.data.assets.length && !S.data.debts.length && !Object.keys(S.data.history).length;
+function viewData() {
+  if (isSample()) return sampleData(new Date());
+  return {
+    assets: S.data.assets, debts: S.data.debts, sample: false,
+    history: Object.entries(S.data.history).map(([id, v]) => ({ id, ...v })),
+  };
+}
+
+/* ---------- render ---------- */
+function render() {
+  renderHeader();
+  renderBanner();
+  document.querySelectorAll('.tab[data-tab]').forEach(t => {
+    if (t.dataset.tab === S.tab) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+  });
+  const d = viewData();
+  $('#view').replaceChildren(S.tab === 'varlik' ? renderAssets(d) : S.tab === 'borc' ? renderDebts(d) : renderSummary(d));
+  if (S.tab === 'ozet') drawChartSoon();
+}
+
+function priceState() {
+  if (S.priceLoading) return { cls: 'busy', text: 'Fiyatlar yenileniyor…' };
+  if (!navigator.onLine) return { cls: '', text: S.prices ? `Çevrimdışı · fiyatlar ${shortStamp(new Date(S.prices.sourceAt))}` : 'Çevrimdışı' };
+  if (!S.prices) return { cls: '', text: S.priceError ? 'Fiyatlar alınamadı' : 'Fiyatlar bekleniyor' };
+  const stale = S.priceError || Date.now() - S.prices.fetchedAt > 6 * 3600e3;
+  return { cls: stale ? '' : 'ok', text: `${stale ? 'Fiyatlar eski · ' : 'Fiyatlar '}${shortStamp(new Date(S.prices.sourceAt))}` };
+}
+function renderPriceBits() {
+  const st = priceState();
+  $('#sync').textContent = st.text;
+  $('#syncDot').className = 'sync-dot ' + st.cls;
+  const rb = $('#mktRefresh');
+  if (rb) rb.classList.toggle('spin', S.priceLoading);
+}
+
+function renderHeader() {
+  const now = new Date();
+  $('#today').textContent = `${now.getDate()} ${AY[now.getMonth()]} ${GUN[now.getDay()]}`;
+  renderPriceBits();
+  const hb = $('#hideBtn');
+  const label = S.hide ? 'Tutarları göster' : 'Tutarları gizle';
+  hb.replaceChildren(icon(S.hide ? 'eyeOff' : 'eye'));
+  hb.setAttribute('aria-pressed', String(S.hide));
+  hb.setAttribute('aria-label', label);
+  hb.title = label;
+  const sb = $('#setBtn');
+  if (!sb.firstChild) sb.append(icon('gear'));
+}
+
+function needsBackup() {
+  const d = S.data;
+  if (!d.assets.length && !d.debts.length) return false;
+  const now = Date.now();
+  return d.lastBackup ? now - d.lastBackup > 14 * 864e5 : d.firstDataAt && now - d.firstDataAt > 2 * 864e5;
+}
+function renderBanner() {
+  const b = $('#banner');
+  let pill = null, text = null, action = null;
+  if (S.storageBlocked) { pill = 'Uyarı'; text = 'Bu tarayıcıda kayıt kapalı; girdiklerin saklanmaz.'; }
+  else if (S.recovered) { pill = 'Uyarı'; text = 'Kayıtlı veriler okunamadı. Yedeğin varsa Ayarlar’dan geri yükle.'; action = ['Ayarlar', openSettings]; }
+  else if (S.inSafari) { pill = 'Safari'; text = 'Safari’de açıksın. Buraya girdiklerin ana ekrandaki uygulamaya geçmez; uygulamayı ana ekrandan aç.'; }
+  else if (isSample()) { pill = 'Örnek'; text = 'Bunlar örnek rakamlar. İlk kaydını eklediğinde kaybolur.'; action = ['İlk kaydım', openChooser]; }
+  else if (S.tab === 'ozet' && needsBackup()) {
+    pill = 'Yedek';
+    const days = S.data.lastBackup ? Math.floor((Date.now() - S.data.lastBackup) / 864e5) : 0;
+    text = S.data.lastBackup ? `Son yedeğin ${days} gün önce. Telefon değişir ya da uygulama silinirse diye yeni yedek al.` : 'Henüz yedek almadın. Telefon değişir ya da uygulama silinirse verilerin kaybolmasın.';
+    action = ['Yedek al', backup];
+  }
+  if (!text) { b.hidden = true; b.replaceChildren(); return; }
+  b.hidden = false;
+  b.replaceChildren(
+    h('span', { class: 'pill' }, pill),
+    h('p', null, text),
+    ...(action ? [h('button', { class: 'btn primary sm', type: 'button', onclick: action[1] }, action[0] === 'İlk kaydım' ? icon('plus') : null, action[0])] : []),
+  );
+}
+
+/* summary */
+function renderSummary(d) {
+  const t = totals(d.assets, d.debts);
+  return h('div', { class: 'dash' }, heroCard(d, t), payCard(d), distCard(d), marketCard(d), trendCard(d, t));
+}
+
+function prevMonth(history, now) {
+  const cur = monthKey(now);
+  const past = history.filter(x => x.id < cur).sort((a, b) => (a.id < b.id ? 1 : -1));
+  return past.length ? { net: past[0].net, m: Number(past[0].id.slice(5, 7)) - 1 } : null;
+}
+
+function heroCard(d, t) {
+  const prev = prevMonth(d.history, new Date());
+  let delta;
+  if (!prev) {
+    delta = h('div', { class: 'delta flat' }, 'Aylık değişim gelecek ay burada görünecek');
+  } else {
+    const diff = Math.round(t.net - prev.net);
+    delta = diff === 0
+      ? h('div', { class: 'delta flat' }, `${AY[prev.m]} ayıyla aynı`)
+      : h('div', { class: 'delta ' + (diff > 0 ? 'up' : 'down') },
+          icon(diff > 0 ? 'up' : 'down'), money(Math.abs(diff)),
+          h('span', { class: 'muted' }, `${AY[prev.m]} ayına göre`));
+  }
+  const max = Math.max(t.assets, t.debts, 1);
+  const cmpRow = (name, v, cls, count) => h('div', null,
+    h('div', { class: 'cmp-top' },
+      h('span', { class: 'cmp-name' }, h('span', { class: 'key ' + cls }), name, h('small', null, `${count} kalem`)),
+      h('span', { class: 'cmp-val' }, money(v))),
+    h('div', { class: 'bar ' + cls, style: `width:${(Math.max(0, v) / max) * 100}%` }));
+  return h('section', { class: 'card hero span2', 'aria-label': 'Net birikim' },
+    h('div', null,
+      h('div', { class: 'hero-label' }, 'Net birikim', t.net < 0 ? chip('crit', 'alert', 'Borç, varlıktan fazla') : null),
+      bigMoney(t.net, 'hero-num'),
+      delta),
+    h('div', { class: 'cmp' },
+      cmpRow('Varlıklar', t.assets, 'asset', d.assets.length),
+      cmpRow('Borçlar', t.debts, 'debt', d.debts.length)));
+}
+
+function payCard(d) {
+  const now = new Date();
+  const items = d.debts.filter(x => x.minimum > 0).map(x => {
+    const key = cycleKey(x, now);
+    const due = x.dueDay ? nextDue(x.dueDay, now) : null;
+    return { x, key, due, days: due ? daysBetween(today0(now), due) : null, paid: x.paidFor === key };
+  });
+  items.sort((a, b) => (a.paid - b.paid) || ((a.days ?? 99) - (b.days ?? 99)) || (b.x.minimum - a.x.minimum));
+  const total = sum(items.map(i => i.x.minimum));
+  const paid = sum(items.filter(i => i.paid).map(i => i.x.minimum));
+  const pct = total ? (paid / total) * 100 : 0;
+  const card = h('section', { class: 'card', 'aria-labelledby': 'payT' },
+    h('div', { class: 'card-head' }, h('h2', { class: 'card-title', id: 'payT' }, 'Yaklaşan ödemeler'), h('span', { class: 'card-note' }, 'asgari ve taksit')));
+  if (!items.length) {
+    card.append(h('p', { class: 'empty-note' }, 'Aylık ödemesi girilmiş borç yok. Borç eklerken asgari ya da taksit tutarını yaz.'));
+    return card;
+  }
+  card.append(
+    h('div', { class: 'pay-sum' },
+      h('div', { class: 'pay-big' }, money(total)),
+      h('div', { class: 'pay-cap' }, `${items.filter(i => i.paid).length}/${items.length} ödendi`)),
+    h('div', { class: 'meter', role: 'progressbar', 'aria-label': 'Ödenen oran', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': Math.round(pct) },
+      h('div', { style: `width:${pct}%` })),
+    h('div', { class: 'pay-cap' }, `${money(paid)} ödendi · ${money(total - paid)} kaldı`),
+    h('ul', { class: 'plist' }, items.map(i => payRow(i, d.sample))));
+  return card;
+}
+
+function dueChip(i) {
+  if (i.paid) return chip('good', 'check', 'Ödendi');
+  if (i.days == null) return chip('plain', null, 'Günü yok');
+  if (i.days === 0) return chip('crit', 'alert', 'Bugün');
+  if (i.days === 1) return chip('warn', 'clock', 'Yarın');
+  if (i.days <= 3) return chip('warn', 'clock', `${i.days} gün`);
+  return chip('plain', null, `${i.days} gün`);
+}
+
+function payRow(i, sample) {
+  const k = dkind(i.x.kind);
+  const sub = [k.label];
+  if (i.due) sub.push(`${i.due.getDate()} ${AYK[i.due.getMonth()]}`);
+  return h('li', { class: 'prow' + (i.paid ? ' paid' : '') },
+    h('button', {
+      class: 'chk', type: 'button', 'aria-pressed': String(i.paid),
+      'aria-label': `${i.x.bank} ${k.label}: ${i.paid ? 'ödenmedi yap' : 'ödendi olarak işaretle'}`,
+      onclick: () => togglePaid(i, sample),
+    }, h('span', null, icon('check'))),
+    h('div', { class: 'pmain' }, h('div', { class: 'pname' }, i.x.bank), h('div', { class: 'psub' }, sub.join(' · '))),
+    h('div', { class: 'pright' }, h('div', { class: 'pamt' }, money(i.x.minimum)), dueChip(i)));
+}
+
+function distCard(d) {
+  const card = h('section', { class: 'card', 'aria-labelledby': 'distT' },
+    h('div', { class: 'card-head' }, h('h2', { class: 'card-title', id: 'distT' }, 'Varlık dağılımı'), h('span', { class: 'card-note' }, 'türe göre')));
+  const by = new Map();
+  for (const a of d.assets) by.set(a.kind, (by.get(a.kind) || 0) + assetValue(a));
+  const rows = [...by.entries()].filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+  if (!rows.length) {
+    card.append(h('p', { class: 'empty-note' }, 'Varlık ekleyince paranın nerede durduğunu burada görürsün.'));
+    return card;
+  }
+  const max = rows[0][1];
+  const all = sum(rows.map(r => r[1]));
+  card.append(h('ul', { class: 'dlist' }, rows.map(([kind, v]) => {
+    const k = akind(kind);
+    return h('li', null,
+      h('div', { class: 'drow-top' },
+        h('span', { class: 'mini-ico' }, icon(k.icon)),
+        h('span', { class: 'dname' }, k.label),
+        h('span', { class: 'dval' }, money(v)),
+        h('span', { class: 'dpct' }, '%' + Math.round((v / all) * 100))),
+      h('div', { class: 'dbar', style: `width:${(v / max) * 100}%` }));
+  })));
+  return card;
+}
+
+function marketCard(d) {
+  const held = [];
+  for (const a of d.assets) if ((fxOf(a.unit) || goldOf(a.unit)) && !held.includes(a.unit)) held.push(a.unit);
+  const codes = [...held, ...['USD', 'EUR', 'GRA', 'CEYREKALTIN'].filter(c => !held.includes(c))].slice(0, 6);
+  const refresh = h('button', {
+    class: 'round-btn' + (S.priceLoading ? ' spin' : ''), id: 'mktRefresh', type: 'button',
+    'aria-label': 'Fiyatları yenile', title: 'Fiyatları yenile', onclick: () => refreshPrices(true),
+  }, icon('refresh'));
+  const card = h('section', { class: 'card', 'aria-labelledby': 'mktT' },
+    h('div', { class: 'card-head' },
+      h('div', null, h('h2', { class: 'card-title', id: 'mktT' }, 'Güncel fiyatlar'), h('div', { class: 'card-note' }, S.prices ? `alış · ${shortStamp(new Date(S.prices.sourceAt))}` : 'alış fiyatı')),
+      refresh));
+  if (!S.prices) {
+    card.append(h('p', { class: 'empty-note' }, S.priceError || !navigator.onLine
+      ? 'Fiyatlar alınamadı. İnternete bağlanınca kendiliğinden gelir.'
+      : 'Fiyatlar alınıyor…'));
+    return card;
+  }
+  card.append(h('ul', { class: 'mkt' }, codes.map(code => {
+    const f = fxOf(code), g = goldOf(code);
+    const p = S.prices.items[code];
+    const name = f ? f.label : g.title;
+    const unit = f ? `1 ${f.sym}` : `1 ${g.unit === 'gram' ? 'gram' : 'adet'}`;
+    const ch = p ? p.change : 0;
+    const cls = ch > 0 ? 'up' : ch < 0 ? 'down' : 'flat';
+    return h('li', null,
+      h('span', { class: 'n' }, name, h('small', null, unit)),
+      h('span', { class: 'p' }, p ? money2(p.buy) : '—'),
+      h('span', { class: 'c ' + cls }, p ? `${ch > 0 ? '▲' : ch < 0 ? '▼' : ''} %${NF2F.format(Math.abs(ch))}` : ''));
+  })));
+  return card;
+}
+
+// One point per month: the stored month-end state, carried forward over months with no change,
+// and today's live totals for the current month.
+function monthlySeries(history, t, now) {
+  const cur = monthKey(now);
+  const map = new Map(history.filter(x => x.id < cur).map(x => [x.id, x]));
+  const keys = [...map.keys()].sort();
+  const out = [];
+  let [y, m] = (keys[0] || cur).split('-').map(Number);
+  m -= 1;
+  let last = null;
+  for (let guard = 0; guard < 240; guard++) {
+    const key = `${y}-${pad(m + 1)}`;
+    if (key >= cur) { out.push({ y, m, net: t.net, assets: t.assets, debts: t.debts, live: true }); break; }
+    const rec = map.get(key);
+    if (rec) last = rec;
+    if (last) out.push({ y, m, net: last.net, assets: last.assets, debts: last.debts, carried: !rec });
+    m += 1; if (m > 11) { m = 0; y += 1; }
+  }
+  return out.slice(-24);
+}
+
+function trendCard(d, t) {
+  const pts = monthlySeries(d.history, t, new Date());
+  const head = h('div', { class: 'card-head' }, h('h2', { class: 'card-title', id: 'trT' }, 'Net birikim, ay ay'));
+  const card = h('section', { class: 'card span2', 'aria-labelledby': 'trT' }, head);
+  if (pts.length < 2) {
+    card.append(h('p', { class: 'empty-note' }, 'Her ayın son durumu kendiliğinden saklanır. Grafik ikinci ayda burada başlar.'));
+    return card;
+  }
+  head.append(h('button', {
+    class: 'link-btn', type: 'button', 'aria-pressed': String(S.showTable),
+    onclick: () => { S.showTable = !S.showTable; render(); },
+  }, 'Tablo'));
+  if (S.showTable) {
+    card.append(h('div', { class: 'tbl-wrap' }, h('table', { class: 'tbl' },
+      h('thead', null, h('tr', null, h('th', null, 'Ay'), h('th', null, 'Varlık'), h('th', null, 'Borç'), h('th', null, 'Net'))),
+      h('tbody', null, pts.slice().reverse().map(p => h('tr', null,
+        h('td', null, `${AY[p.m]} ${p.y}`), h('td', null, money(p.assets)), h('td', null, money(p.debts)), h('td', null, h('strong', null, money(p.net)))))))));
+    return card;
+  }
+  const box = h('div', { class: 'chart', id: 'chart' });
+  box._pts = pts;
+  card.append(box);
+  return card;
+}
+
+function niceStep(raw) {
+  const exp = Math.floor(Math.log10(raw));
+  const f = raw / 10 ** exp;
+  return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * 10 ** exp;
+}
+function niceTicks(lo, hi, count) {
+  if (hi - lo <= 0) hi = lo + 1;
+  const step = niceStep((hi - lo) / (count - 1));
+  const a = Math.floor(lo / step) * step, b = Math.ceil(hi / step) * step;
+  const out = [];
+  for (let v = a; v <= b + step / 2; v += step) out.push(Math.round(v));
+  return out;
+}
+
+function drawChartSoon() {
+  requestAnimationFrame(() => { const box = $('#chart'); if (box) drawChart(box); });
+}
+
+function drawChart(box) {
+  const pts = box._pts;
+  if (!pts || !box.isConnected) return;
+  const W = Math.max(280, Math.round(box.clientWidth));
+  const H = W < 520 ? 210 : 250;
+  const M = { t: 28, r: 16, b: 32, l: 52 };
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+  const vals = pts.map(p => p.net);
+  const ticks = niceTicks(Math.min(0, ...vals), Math.max(0, ...vals), 4);
+  const lo = ticks[0], hi = ticks[ticks.length - 1];
+  const li = pts.length - 1;
+  const x = i => M.l + (i * iw) / li;
+  const y = v => M.t + ih - ((v - lo) / (hi - lo || 1)) * ih;
+  const last = pts[li];
+
+  const svg = sv('svg', {
+    viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', tabindex: 0,
+    'aria-label': `Net birikim, son ${pts.length} ay. Son değer ${money(last.net)}. Ayları görmek için ok tuşlarını kullan.`,
+  });
+  for (const tv of ticks) {
+    svg.append(sv('line', { x1: M.l, x2: W - M.r, y1: y(tv), y2: y(tv), class: tv === 0 ? 'zero' : 'grid' }));
+    const lbl = sv('text', { x: M.l - 10, y: y(tv), class: 'ax', 'text-anchor': 'end', 'dominant-baseline': 'middle' });
+    lbl.textContent = compact(tv);
+    svg.append(lbl);
+  }
+  const every = pts.length > 12 ? 3 : pts.length > 7 ? 2 : 1;
+  pts.forEach((p, i) => {
+    if ((li - i) % every !== 0) return;
+    const tx = sv('text', { x: x(i), y: H - 8, class: 'ax', 'text-anchor': i === li ? 'end' : i === 0 ? 'start' : 'middle' });
+    tx.textContent = AYK[p.m] + (p.m === 0 ? ` ’${String(p.y).slice(2)}` : '');
+    svg.append(tx);
+  });
+  const base = y(clamp(0, lo, hi));
+  const path = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.net).toFixed(1)}`).join('');
+  svg.append(
+    sv('path', { d: `${path}L${x(li).toFixed(1)},${base.toFixed(1)}L${x(0).toFixed(1)},${base.toFixed(1)}Z`, class: 'area' }),
+    sv('path', { d: path, class: 'line' }),
+    sv('circle', { cx: x(li), cy: y(last.net), r: 5, class: 'dot' }));
+  const endLbl = sv('text', { x: x(li) - 10, y: y(last.net) - 12, class: 'endlbl', 'text-anchor': 'end' });
+  endLbl.textContent = money(last.net);
+  const cross = sv('line', { y1: M.t, y2: M.t + ih, class: 'cross', visibility: 'hidden' });
+  const hdot = sv('circle', { r: 5, class: 'dot', visibility: 'hidden' });
+  svg.append(endLbl, cross, hdot, sv('rect', { x: M.l - 12, y: 0, width: iw + 24, height: H, fill: 'transparent' }));
+
+  const tip = h('div', { class: 'tip', hidden: true });
+  box.replaceChildren(svg, tip);
+
+  let cur = -1;
+  const show = i => {
+    cur = i;
+    const p = pts[i], cx = x(i), cy = y(p.net);
+    for (const [el, k] of [[cross, 'x1'], [cross, 'x2'], [hdot, 'cx']]) el.setAttribute(k, cx);
+    hdot.setAttribute('cy', cy);
+    cross.setAttribute('visibility', 'visible');
+    hdot.setAttribute('visibility', 'visible');
+    endLbl.setAttribute('visibility', i === li ? 'visible' : 'hidden');
+    tip.replaceChildren(
+      h('div', { class: 'tip-m' }, `${AY[p.m]} ${p.y}${p.live ? ' · bugün' : p.carried ? ' · değişiklik yok' : ''}`),
+      h('div', { class: 'tip-v' }, money(p.net)),
+      h('div', { class: 'tip-r' }, h('span', null, 'Varlık'), h('span', null, money(p.assets))),
+      h('div', { class: 'tip-r' }, h('span', null, 'Borç'), h('span', null, money(p.debts))));
+    tip.hidden = false;
+    const scale = box.clientWidth / W;
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    tip.style.left = clamp(cx * scale, tw / 2, box.clientWidth - tw / 2) + 'px';
+    const above = cy * scale - th - 14;
+    tip.style.top = (above >= 0 ? above : cy * scale + 14) + 'px';
+  };
+  const hide = () => {
+    cur = -1;
+    tip.hidden = true;
+    cross.setAttribute('visibility', 'hidden');
+    hdot.setAttribute('visibility', 'hidden');
+    endLbl.setAttribute('visibility', 'visible');
+  };
+  const pick = e => {
+    const r = svg.getBoundingClientRect();
+    const px = ((e.clientX - r.left) * W) / r.width;
+    show(clamp(Math.round(((px - M.l) / iw) * li), 0, li));
+  };
+  svg.addEventListener('pointermove', pick);
+  svg.addEventListener('pointerdown', pick);
+  svg.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hide(); });
+  svg.addEventListener('focus', () => show(cur < 0 ? li : cur));
+  svg.addEventListener('blur', hide);
+  svg.addEventListener('keydown', e => {
+    const at = cur < 0 ? li : cur;
+    if (e.key === 'ArrowLeft') { show(Math.max(0, at - 1)); e.preventDefault(); }
+    else if (e.key === 'ArrowRight') { show(Math.min(li, at + 1)); e.preventDefault(); }
+    else if (e.key === 'Escape') hide();
+  });
+}
+
+/* assets tab */
+function assetSub(a) {
+  const mode = akind(a.kind).mode;
+  const missing = (mode === 'fx' || mode === 'gold') && priceOf(a.unit) == null ? ' · fiyat bekleniyor' : '';
+  // Name the currency or gold type only when the title doesn't already say it.
+  if (mode === 'fx') { const f = fxOf(a.unit); return `${a.title === f.label ? '' : f.label + ' · '}${fmtQty(a.qty)} ${f.sym}${missing}`; }
+  if (mode === 'gold') { const g = goldOf(a.unit); return `${a.title === g.title ? '' : g.title + ' · '}${fmtQty(a.qty)} ${g.unit}${missing}`; }
+  if (mode === 'inv') {
+    const s = invOf(a.sub).label;
+    return a.unit === 'MANUAL' ? `${s} · ${fmtQty(a.qty)} adet × ${money2(a.price)}` : s;
+  }
+  return akind(a.kind).label;
+}
+
+function renderAssets(d) {
+  const t = totals(d.assets, d.debts);
+  const wrap = h('div', { class: 'list-wrap' },
+    h('section', { class: 'card sum-card' },
+      h('div', null,
+        h('div', { class: 'sum-label' }, 'Toplam varlık'),
+        bigMoney(t.assets, 'sum-big'),
+        h('div', { class: 'sum-sub' }, `${d.assets.length} kalem · altın ve döviz güncel alış fiyatıyla`)),
+      h('button', { class: 'btn primary', type: 'button', onclick: () => openAsset(null) }, icon('plus'), 'Varlık ekle')));
+  if (!d.assets.length) {
+    wrap.append(h('section', { class: 'card' }, h('p', { class: 'empty-note' }, 'Henüz varlık yok. Banka hesabı, nakit, altın, döviz, yatırım… ne varsa başlığıyla ekle.')));
+    return wrap;
+  }
+  const list = d.assets.slice().sort((a, b) => assetValue(b) - assetValue(a));
+  wrap.append(h('section', { class: 'card rows-card' }, h('ul', { class: 'rows' }, list.map(a => {
+    const k = akind(a.kind);
+    return h('li', null, h('button', { class: 'row', type: 'button', onclick: () => (d.sample ? sampleTap() : openAsset(a)) },
+      h('span', { class: 'ico' }, icon(k.icon)),
+      h('span', { class: 'rmain' }, h('span', { class: 'rtitle' }, a.title), h('span', { class: 'rsub' }, assetSub(a))),
+      h('span', { class: 'ramt' }, money(assetValue(a)))));
+  }))));
+  return wrap;
+}
+
+/* debts tab */
+function renderDebts(d) {
+  const t = totals(d.assets, d.debts);
+  const wrap = h('div', { class: 'list-wrap' },
+    h('section', { class: 'card sum-card' },
+      h('div', null,
+        h('div', { class: 'sum-label' }, 'Toplam borç'),
+        bigMoney(t.debts, 'sum-big'),
+        h('div', { class: 'sum-sub' }, 'Aylık asgari ve taksit: ', h('strong', null, money(t.monthly)))),
+      h('button', { class: 'btn primary', type: 'button', onclick: () => openDebt(null) }, icon('plus'), 'Borç ekle')));
+  if (!d.debts.length) {
+    wrap.append(h('section', { class: 'card' }, h('p', { class: 'empty-note' }, 'Henüz borç yok. Kredi kartı, kredi ya da KMH borçlarını banka banka ekle.')));
+    return wrap;
+  }
+  const groups = new Map();
+  for (const x of d.debts) {
+    const key = x.bank.toLocaleLowerCase('tr');
+    if (!groups.has(key)) groups.set(key, { name: x.bank, items: [] });
+    groups.get(key).items.push(x);
+  }
+  const list = [...groups.values()]
+    .map(g => ({ ...g, total: sum(g.items.map(i => i.total)) }))
+    .sort((a, b) => b.total - a.total);
+  wrap.append(h('section', { class: 'card rows-card' }, list.map(g => h('div', { class: 'group' },
+    h('div', { class: 'group-head' }, h('span', { class: 'group-name' }, g.name), h('span', { class: 'group-total' }, money(g.total))),
+    h('ul', { class: 'rows' }, g.items.slice().sort((a, b) => b.total - a.total).map(x => debtRow(x, d.sample)))))));
+  return wrap;
+}
+
+function debtRow(x, sample) {
+  const k = dkind(x.kind);
+  const sub = [];
+  if (x.minimum > 0) sub.push(`${k.short} ${money(x.minimum)}`);
+  if (x.dueDay) sub.push(`her ayın ${ordinal(x.dueDay)}`);
+  return h('li', null, h('button', { class: 'row', type: 'button', onclick: () => (sample ? sampleTap() : openDebt(x)) },
+    h('span', { class: 'ico debt' }, icon(k.icon)),
+    h('span', { class: 'rmain' },
+      h('span', { class: 'rtitle' }, k.label + (x.note ? ' · ' + x.note : '')),
+      sub.length ? h('span', { class: 'rsub' }, sub.join(' · ')) : null),
+    h('span', { class: 'ramt' }, money(x.total), h('small', null, 'toplam'))));
+}
+
+/* ---------- sheets & forms ---------- */
+let sheetEl = null, lastFocus = null;
+function openSheet(title, body, focusEl) {
+  closeSheet(true);
+  if (!lastFocus) lastFocus = document.activeElement;
+  const sheet = h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'sheetT', tabindex: -1 },
+    h('div', { class: 'grab' }),
+    h('div', { class: 'sheet-head' },
+      h('h2', { class: 'sheet-title', id: 'sheetT' }, title),
+      h('button', { class: 'icon-btn flat', type: 'button', 'aria-label': 'Kapat', onclick: () => closeSheet() }, icon('close'))),
+    body);
+  // Keep the focused field visible above the on-screen keyboard.
+  sheet.addEventListener('focusin', e => {
+    if (e.target.matches('input, select')) setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300);
+  });
+  const scrim = h('div', { class: 'scrim', onclick: e => { if (e.target === scrim) closeSheet(); } }, sheet);
+  document.body.append(scrim);
+  sheetEl = scrim;
+  document.documentElement.classList.add('locked');
+  const finePointer = window.matchMedia && matchMedia('(pointer: fine)').matches;
+  setTimeout(() => (finePointer && focusEl ? focusEl : sheet).focus(), 30);
+}
+function closeSheet(silent) {
+  if (!sheetEl) return;
+  sheetEl.remove();
+  sheetEl = null;
+  if (silent) return;
+  document.documentElement.classList.remove('locked');
+  if (lastFocus && lastFocus.isConnected && lastFocus.focus) lastFocus.focus();
+  lastFocus = null;
+}
+
+function field(label, control, forId, hint) {
+  return h('div', { class: 'field' },
+    forId ? h('label', { class: 'lbl', for: forId }, label) : h('div', { class: 'lbl' }, label),
+    control,
+    hint ? h('div', { class: 'hint' }, hint) : null);
+}
+function blurFormat(input, fmt) {
+  input.addEventListener('blur', () => { const v = parseAmount(input.value); if (Number.isFinite(v)) input.value = fmt(v); });
+}
+function moneyInput(id, value) {
+  const input = h('input', { class: 'input', id, inputmode: 'decimal', autocomplete: 'off', placeholder: '0', value: value != null ? NF2.format(value) : null });
+  blurFormat(input, v => NF2.format(v));
+  return { input, wrap: h('div', { class: 'money' }, h('span', { 'aria-hidden': 'true' }, '₺'), input) };
+}
+function qtyInput(id, value) {
+  const input = h('input', { class: 'input', id, inputmode: 'decimal', autocomplete: 'off', placeholder: '0', value: value != null ? NF4.format(value) : null });
+  blurFormat(input, v => NF4.format(v));
+  const suffix = h('span', { class: 'suffix', 'aria-hidden': 'true' });
+  const label = h('label', { class: 'lbl', for: id }, 'Miktar');
+  return {
+    input,
+    field: h('div', { class: 'field' }, label, h('div', { class: 'qty' }, input, suffix)),
+    set(labelText, suffixText) { label.textContent = labelText; suffix.textContent = suffixText; },
+  };
+}
+// Radio-style chips. options: [{id, label, icon?, badge?}]
+function chipGroup(options, selected, onChange, label) {
+  let value = selected;
+  const btns = options.map(o => h('button', {
+    class: 'opt' + (o.icon ? ' has-ico' : ''), type: 'button', role: 'radio', 'aria-checked': String(o.id === value),
+    onclick: () => {
+      value = o.id;
+      btns.forEach((b, j) => b.setAttribute('aria-checked', String(options[j].id === value)));
+      onChange(o.id);
+    },
+  }, o.icon ? icon(o.icon) : null, o.label, o.badge ? h('span', { class: 'badge' }, o.badge) : null));
+  return h('div', { class: 'opts', role: 'radiogroup', 'aria-label': label }, btns);
+}
+function segmented(options, selected, onChange) {
+  const btns = options.map(o => h('button', {
+    type: 'button', 'aria-pressed': String(o.id === selected),
+    onclick: () => { btns.forEach((b, j) => b.setAttribute('aria-pressed', String(options[j].id === o.id))); onChange(o.id); },
+  }, o.label));
+  return h('div', { class: 'seg' }, btns);
+}
+function deleteBlock(onConfirm) {
+  const box = h('div');
+  const reset = () => box.replaceChildren(h('button', { class: 'btn text-danger block', type: 'button', onclick: ask }, 'Sil'));
+  function ask() {
+    box.replaceChildren(h('div', { class: 'confirm' },
+      h('p', null, 'Silinsin mi? Geri alınamaz.'),
+      h('div', { class: 'confirm-btns' },
+        h('button', { class: 'btn ghost sm', type: 'button', onclick: reset }, 'Vazgeç'),
+        h('button', { class: 'btn danger sm', type: 'button', onclick: onConfirm }, 'Evet, sil'))));
+  }
+  reset();
+  return box;
+}
+
+function openChooser() {
+  openSheet('Ne eklemek istersin?', h('div', { class: 'choose' },
+    h('button', { class: 'choice', type: 'button', onclick: () => openAsset(null) },
+      h('span', { class: 'ico' }, icon('wallet')),
+      h('span', null, h('strong', null, 'Varlık ekle'), h('span', { class: 's' }, 'Hesap, nakit, döviz, altın, yatırım…'))),
+    h('button', { class: 'choice', type: 'button', onclick: () => openDebt(null) },
+      h('span', { class: 'ico debt' }, icon('card')),
+      h('span', null, h('strong', null, 'Borç ekle'), h('span', { class: 's' }, 'Kredi kartı, kredi, KMH, kişi…')))));
+}
+
+function openAsset(a) {
+  const isNew = !a;
+  const mode0 = a ? akind(a.kind).mode : 'tl';
+  const st = {
+    kind: a ? a.kind : 'banka',
+    fx: mode0 === 'fx' ? a.unit : 'USD',
+    gold: mode0 === 'gold' ? a.unit : 'GRA',
+    sub: a && a.sub ? a.sub : 'hisse',
+    inv: a && a.unit === 'MANUAL' ? 'adet' : 'tutar',
+  };
+  // An automatic title (e.g. "Dolar") follows the chosen unit, so start it empty.
+  const autoTitle = a && (mode0 === 'fx' || mode0 === 'gold') && a.title === defaultTitle(a.kind, a.unit);
+  const title = h('input', { class: 'input', id: 'f-title', maxlength: 80, autocomplete: 'off', value: a && !autoTitle ? a.title : null });
+  const titleLabel = h('label', { class: 'lbl', for: 'f-title' }, 'Başlık');
+  const tl = moneyInput('f-amount', a && a.unit === 'TRY' ? a.qty : null);
+  const qty = qtyInput('f-qty', a && a.unit !== 'TRY' ? a.qty : null);
+  const price = moneyInput('f-price', a && a.unit === 'MANUAL' ? a.price : null);
+  const preview = h('div', { class: 'preview', 'aria-live': 'polite', hidden: true });
+  const err = h('div', { class: 'err', role: 'alert' });
+  const dyn = h('div');
+
+  const updatePreview = () => {
+    const mode = akind(st.kind).mode;
+    const q = parseAmount(qty.input.value);
+    let parts = null;
+    if (mode === 'fx' || mode === 'gold') {
+      const code = mode === 'fx' ? st.fx : st.gold;
+      const p = priceOf(code);
+      const g = goldOf(code);
+      const one = mode === 'fx' ? `1 ${fxOf(code).sym}` : g.unit === 'gram' ? '1 gram' : `1 ${g.label.toLocaleLowerCase('tr')}`;
+      parts = p == null
+        ? [h('span', null, 'Fiyat henüz alınamadı. İnternete bağlanınca TL karşılığı kendiliğinden hesaplanır.')]
+        : [h('strong', null, Number.isFinite(q) ? '≈ ' + money(q * p) : '≈ ₺—'), h('span', null, ` · ${one} = ${money2(p)} (alış)`)];
+    } else if (mode === 'inv' && st.inv === 'adet') {
+      const pr = parseAmount(price.input.value);
+      parts = [h('strong', null, Number.isFinite(q) && Number.isFinite(pr) ? '= ' + money(q * pr) : '= ₺—'), h('span', null, ' toplam değer')];
+    }
+    preview.replaceChildren(...(parts || []));
+    preview.hidden = !parts;
+  };
+  [qty.input, price.input].forEach(i => i.addEventListener('input', updatePreview));
+
+  const titleField = (label, placeholder) => {
+    titleLabel.textContent = label;
+    title.placeholder = placeholder;
+    return h('div', { class: 'field' }, titleLabel, title);
+  };
+  function layout() {
+    const mode = akind(st.kind).mode;
+    const parts = [];
+    if (mode === 'fx') {
+      parts.push(field('Para birimi', chipGroup(FX.map(f => ({ id: f.code, label: f.label, badge: f.sym.length === 1 ? f.sym : null })), st.fx,
+        v => { st.fx = v; qty.set('Miktar', fxOf(v).sym); updatePreview(); }, 'Para birimi')));
+      qty.set('Miktar', fxOf(st.fx).sym);
+      parts.push(qty.field, preview, titleField('Başlık (isteğe bağlı)', 'örn. Dolar birikimi'));
+    } else if (mode === 'gold') {
+      const setQty = code => { const g = goldOf(code); qty.set(g.unit === 'gram' ? 'Kaç gram?' : 'Kaç adet?', g.unit); };
+      parts.push(field('Çeşit', chipGroup(GOLD.map(g => ({ id: g.code, label: g.label })), st.gold,
+        v => { st.gold = v; setQty(v); updatePreview(); }, 'Altın çeşidi')));
+      setQty(st.gold);
+      parts.push(qty.field, preview, titleField('Başlık (isteğe bağlı)', 'örn. Düğün altınları'));
+    } else if (mode === 'inv') {
+      parts.push(field('Ürün', chipGroup(INV.map(x => ({ id: x.id, label: x.label })), st.sub, v => { st.sub = v; }, 'Yatırım ürünü')));
+      parts.push(titleField('Başlık', 'örn. THYAO, AFT fonu, Bitcoin'));
+      parts.push(field('Değeri nasıl gireceksin?', segmented([{ id: 'tutar', label: 'Toplam tutar' }, { id: 'adet', label: 'Adet × fiyat' }], st.inv,
+        v => { st.inv = v; layout(); })));
+      if (st.inv === 'adet') {
+        qty.set('Adet', 'adet');
+        parts.push(h('div', { class: 'two' }, qty.field, field('Birim fiyat', price.wrap, 'f-price')), preview);
+      } else {
+        parts.push(field('Güncel değer', tl.wrap, 'f-amount'));
+      }
+    } else {
+      const ph = { banka: 'örn. Vadeli hesap · Ziraat', nakit: 'örn. Cüzdan', ev: 'örn. Daire', arac: 'örn. Araba' }[st.kind] || 'örn. Alacak';
+      parts.push(titleField('Başlık', ph), field('Tutar', tl.wrap, 'f-amount'));
+    }
+    dyn.replaceChildren(...parts);
+    updatePreview();
+  }
+
+  const fail = (msg, el) => { err.textContent = msg; if (el) el.focus(); };
+  const save = h('button', { class: 'btn primary block', type: 'submit' }, isNew ? 'Kaydet' : 'Değişiklikleri kaydet');
+  const form = h('form', { novalidate: true },
+    field('Tür', chipGroup(AK.map(k => ({ id: k.id, label: k.label, icon: k.icon })), st.kind, v => { st.kind = v; err.textContent = ''; layout(); }, 'Varlık türü')),
+    dyn,
+    err,
+    h('div', { class: 'sheet-actions' }, save, isNew ? null : deleteBlock(() => {
+      if (mutate(d => { d.assets = d.assets.filter(x => x.id !== a.id); })) { closeSheet(); toast('Varlık silindi'); }
+    })));
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    err.textContent = '';
+    const mode = akind(st.kind).mode;
+    let name = title.value.trim(), unit = 'TRY', q, pr = null;
+    if (mode === 'fx' || mode === 'gold') {
+      unit = mode === 'fx' ? st.fx : st.gold;
+      q = parseAmount(qty.input.value);
+      if (!Number.isFinite(q)) return fail(mode === 'fx' ? 'Miktarı rakamla yaz. Örneğin: 1.200' : 'Adedi ya da gramı rakamla yaz. Örneğin: 5', qty.input);
+      if (!name) name = defaultTitle(st.kind, unit);
+    } else if (mode === 'inv' && st.inv === 'adet') {
+      unit = 'MANUAL';
+      q = parseAmount(qty.input.value);
+      pr = parseAmount(price.input.value);
+      if (!name) return fail('Ürünün adını yaz. Örneğin: THYAO.', title);
+      if (!Number.isFinite(q)) return fail('Adedi rakamla yaz.', qty.input);
+      if (!Number.isFinite(pr)) return fail('Birim fiyatı rakamla yaz. Örneğin: 312,50', price.input);
+    } else {
+      q = parseAmount(tl.input.value);
+      if (!name) return fail(mode === 'inv' ? 'Ürünün adını yaz. Örneğin: BES.' : 'Bir başlık yaz. Örneğin: Maaş hesabı.', title);
+      if (!Number.isFinite(q)) return fail('Tutarı rakamla yaz. Örneğin: 12.500', tl.input);
+    }
+    const now = Date.now();
+    const item = {
+      id: a ? a.id : newId(), kind: st.kind, title: name, unit, qty: round4(q),
+      price: pr != null ? round2(pr) : null, sub: mode === 'inv' ? st.sub : null, savedValue: 0,
+      createdAt: (a && a.createdAt) || now, updatedAt: now,
+    };
+    item.savedValue = Math.round(assetValue(item)) || (a && a.unit === unit ? a.savedValue : 0);
+    if (mutate(d => upsert(d.assets, item))) { closeSheet(); toast(isNew ? 'Varlık eklendi' : 'Kaydedildi'); }
+  });
+  layout();
+  openSheet(isNew ? 'Yeni varlık' : 'Varlığı düzenle', form, title);
+}
+
+function openDebt(x) {
+  const isNew = !x;
+  const st = { kind: x ? x.kind : 'kart' };
+  const bank = h('input', { class: 'input', id: 'f-bank', list: 'bank-list', maxlength: 60, autocomplete: 'off', placeholder: 'örn. Garanti BBVA', value: x ? x.bank : null });
+  const total = moneyInput('f-total', x ? x.total : null);
+  const min = moneyInput('f-min', x && x.minimum ? x.minimum : null);
+  const minLabel = h('label', { class: 'lbl', for: 'f-min' }, dkind(st.kind).pay);
+  const day = h('select', { class: 'input', id: 'f-day' },
+    h('option', { value: '' }, 'Yok'),
+    Array.from({ length: 31 }, (_, i) => h('option', { value: i + 1, selected: x && x.dueDay === i + 1 ? true : null }, `Ayın ${ordinal(i + 1)}`)));
+  const note = h('input', { class: 'input', id: 'f-note', maxlength: 80, autocomplete: 'off', placeholder: 'örn. Bonus kart', value: x && x.note ? x.note : null });
+  const err = h('div', { class: 'err', role: 'alert' });
+  const fail = (msg, el) => { err.textContent = msg; if (el) el.focus(); };
+  const save = h('button', { class: 'btn primary block', type: 'submit' }, isNew ? 'Kaydet' : 'Değişiklikleri kaydet');
+  const form = h('form', { novalidate: true },
+    field('Banka ya da kişi', bank, 'f-bank'),
+    field('Borç türü', chipGroup(DK.map(k => ({ id: k.id, label: k.label, icon: k.icon })), st.kind, v => { st.kind = v; minLabel.textContent = dkind(v).pay; }, 'Borç türü')),
+    h('div', { class: 'two' },
+      field('Toplam borç', total.wrap, 'f-total'),
+      h('div', { class: 'field' }, minLabel, min.wrap)),
+    field('Son ödeme günü', h('div', { class: 'sel' }, day, icon('chev')), 'f-day'),
+    field('Not', note, 'f-note', 'İsteğe bağlı. Kart numarası ya da şifre yazma.'),
+    err,
+    h('div', { class: 'sheet-actions' }, save, isNew ? null : deleteBlock(() => {
+      if (mutate(d => { d.debts = d.debts.filter(y => y.id !== x.id); })) { closeSheet(); toast('Borç silindi'); }
+    })));
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    err.textContent = '';
+    const name = bank.value.trim();
+    const tv = parseAmount(total.input.value);
+    const mraw = min.input.value.trim();
+    const mv = mraw ? parseAmount(mraw) : 0;
+    if (!name) return fail('Banka ya da kişi adını yaz.', bank);
+    if (!Number.isFinite(tv)) return fail('Toplam borcu rakamla yaz. Örneğin: 18.450', total.input);
+    if (!Number.isFinite(mv)) return fail('Aylık ödemeyi rakamla yaz ya da boş bırak.', min.input);
+    const now = Date.now();
+    const item = {
+      id: x ? x.id : newId(), bank: name, kind: st.kind, note: note.value.trim(), total: round2(tv), minimum: round2(mv),
+      dueDay: day.value ? Number(day.value) : null, paidFor: x ? x.paidFor : null,
+      createdAt: (x && x.createdAt) || now, updatedAt: now,
+    };
+    if (mutate(d => upsert(d.debts, item))) { closeSheet(); toast(isNew ? 'Borç eklendi' : 'Kaydedildi'); }
+  });
+  openSheet(isNew ? 'Yeni borç' : 'Borcu düzenle', form, bank);
+}
+
+function sampleTap() { toast('Bu bir örnek. Kendi kaydını + düğmesiyle ekle.'); }
+
+function togglePaid(i, sample) {
+  if (sample) { sampleTap(); return; }
+  mutate(d => {
+    const x = d.debts.find(y => y.id === i.x.id);
+    if (x) { x.paidFor = i.paid ? null : i.key; x.updatedAt = Date.now(); }
+  });
+}
+
+/* ---------- settings, backup, restore ---------- */
+function openSettings() {
+  const d = S.data;
+  const last = d.lastBackup ? `Son yedek: ${new Date(d.lastBackup).getDate()} ${AY[new Date(d.lastBackup).getMonth()]}` : 'Henüz yedek yok';
+  const row = (ic, title, sub, onclick, extra) => h('li', null, h('button', { class: 'set-row' + (extra || ''), type: 'button', onclick },
+    h('span', { class: 'ico' }, icon(ic)), h('span', null, h('strong', null, title), sub ? h('span', { class: 's' }, sub) : null)));
+  openSheet('Ayarlar', h('div', null,
+    h('ul', { class: 'set-list' },
+      row('download', 'Yedek al', `${last}. Dosyalar’a ya da iCloud’a kaydet.`, backup),
+      row('upload', 'Yedekten geri yükle', 'Daha önce aldığın yedek dosyasını seç.', restorePick),
+      row('refresh', 'Fiyatları yenile', S.prices ? `Son fiyatlar: ${shortStamp(new Date(S.prices.sourceAt))}` : 'Henüz fiyat yok', () => { refreshPrices(true); closeSheet(); }),
+      row('trash', 'Tüm verileri sil', 'Bu telefondaki kayıtları temizler.', confirmWipe, ' danger')),
+    h('div', { class: 'note-box' }, icon('info'),
+      h('span', null, 'Verilerin yalnızca bu telefonda saklanır, hiçbir sunucuya gönderilmez. Sadece altın ve döviz fiyatları internetten çekilir. Ana ekrandaki simgeyi silersen veriler de silinir; önce yedek al.'))));
+}
+
+function backup() {
+  const d = S.data;
+  const payload = { app: 'hesap-defterim', v: 1, exportedAt: new Date().toISOString(), data: { assets: d.assets, debts: d.debts, history: d.history } };
+  const name = `hesap-defterim-yedek-${isoDate(new Date())}.json`;
+  const text = JSON.stringify(payload, null, 2);
+  const done = msg => {
+    const next = clone(S.data);
+    next.lastBackup = Date.now();
+    if (persist(next)) S.data = next;
+    closeSheet();
+    render();
+    toast(msg);
+  };
+  let file = null;
+  try { file = new File([text], name, { type: 'application/json' }); } catch (e) { file = null; }
+  if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+    navigator.share({ files: [file], title: 'Hesap Defterim yedeği' })
+      .then(() => done('Yedek hazır. Dosyalar’a kaydettiysen tamam.'))
+      .catch(e => { if (e && e.name !== 'AbortError') toast('Paylaşım açılamadı. Tekrar dene.'); });
+    return;
+  }
+  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+  const link = h('a', { href: url, download: name });
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  done('Yedek dosyası indirildi.');
+}
+
+function restorePick() {
+  const input = h('input', { type: 'file', accept: 'application/json,.json' });
+  input.addEventListener('change', async () => {
+    const f = input.files && input.files[0];
+    if (!f) return;
+    let o = null;
+    try { o = JSON.parse(await f.text()); } catch (e) { o = null; }
+    if (!o || o.app !== 'hesap-defterim' || !o.data) { toast('Bu dosya bir Hesap Defterim yedeği değil.'); return; }
+    const d = sanitizeData(o.data);
+    const when = o.exportedAt ? new Date(o.exportedAt) : null;
+    const whenText = when && !isNaN(when) ? `${when.getDate()} ${AY[when.getMonth()]} ${when.getFullYear()} tarihli yedek.` : 'Tarihi bilinmeyen yedek.';
+    openSheet('Yedek geri yüklensin mi?', h('div', null,
+      h('p', { class: 'sheet-text' }, `${whenText} ${d.assets.length} varlık, ${d.debts.length} borç. Bu telefondaki mevcut kayıtların yerine geçer.`),
+      h('div', { class: 'sheet-actions' },
+        h('button', { class: 'btn primary block', type: 'button', onclick: () => {
+          const next = { ...d, lastBackup: S.data.lastBackup, firstDataAt: d.firstDataAt || Date.now() };
+          if (persist(next)) { S.data = next; S.recovered = false; closeSheet(); render(); toast('Yedek geri yüklendi'); }
+        } }, 'Geri yükle'),
+        h('button', { class: 'btn ghost block', type: 'button', onclick: () => closeSheet() }, 'Vazgeç'))));
+  });
+  input.click();
+}
+
+function confirmWipe() {
+  openSheet('Tüm veriler silinsin mi?', h('div', null,
+    h('p', { class: 'sheet-text' }, 'Bu telefondaki bütün varlık, borç ve geçmiş kayıtları silinir. Yedeğin yoksa geri getirilemez.'),
+    h('div', { class: 'sheet-actions' },
+      h('button', { class: 'btn danger block', type: 'button', onclick: () => {
+        const next = emptyData();
+        if (persist(next)) { S.data = next; closeSheet(); render(); toast('Tüm veriler silindi'); }
+      } }, 'Evet, hepsini sil'),
+      h('button', { class: 'btn ghost block', type: 'button', onclick: () => closeSheet() }, 'Vazgeç'))));
+}
+
+/* ---------- toast ---------- */
+let toastTimer = null;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ---------- install guide (iPhone Safari) ---------- */
+function setupGate() {
+  const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const standalone = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  S.inSafari = ios && !standalone;
+  let skipped = false;
+  try { skipped = sessionStorage.getItem('hd.safari') === '1'; } catch (e) { /* ignore */ }
+  $('#gate').hidden = !S.inSafari || skipped;
+  $('#gateSkip').addEventListener('click', () => {
+    try { sessionStorage.setItem('hd.safari', '1'); } catch (e) { /* ignore */ }
+    $('#gate').hidden = true;
+    render();
+  });
+}
+
+/* ---------- boot ---------- */
+function wire() {
+  document.querySelectorAll('.tab[data-tab]').forEach(t => t.addEventListener('click', () => {
+    if (S.tab === t.dataset.tab) return;
+    S.tab = t.dataset.tab;
+    render();
+    window.scrollTo({ top: 0 });
+  }));
+  const addForTab = () => {
+    if (S.tab === 'varlik') openAsset(null);
+    else if (S.tab === 'borc') openDebt(null);
+    else openChooser();
+  };
+  $('#navAdd').addEventListener('click', addForTab);
+  $('#hideBtn').addEventListener('click', () => {
+    S.hide = !S.hide;
+    try { localStorage.setItem('hd.hide', S.hide ? '1' : '0'); } catch (e) { /* ignore */ }
+    render();
+  });
+  $('#setBtn').addEventListener('click', openSettings);
+  $('#fab').addEventListener('click', addForTab);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheetEl) closeSheet(); });
+  let rt = null;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (S.tab === 'ozet') drawChartSoon(); }, 120); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { render(); refreshPrices(false); } });
+  window.addEventListener('online', () => refreshPrices(false));
+  window.addEventListener('offline', renderPriceBits);
+}
+
+function boot() {
+  try { S.hide = localStorage.getItem('hd.hide') === '1'; } catch (e) { /* ignore */ }
+  S.data = loadData();
+  try {
+    const p = JSON.parse(localStorage.getItem(PKEY) || 'null');
+    if (p && p.items && p.fetchedAt) S.prices = p;
+  } catch (e) { /* refetched below */ }
+  setupGate();
+  wire();
+  render();
+  refreshPrices(false);
+  setInterval(() => { if (!document.hidden) refreshPrices(false); }, 5 * 60 * 1000);
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* works without offline support */ });
+  }
+}
+
+boot();
+})();
+</script>
+</body>
+</html>
