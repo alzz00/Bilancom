@@ -23,7 +23,7 @@ asgari ödemeler ve net birikim. iPhone'da ana ekrana eklenip uygulama gibi kull
 
 ## Yayın
 
-Adres: https://alzz00.github.io/bilancom/ (GitHub Pages). Yayında yalnızca kod vardır, veri yoktur.
+Adres: https://alzz00.github.io/Bilancom/ (GitHub Pages; büyük B ile, küçük harfle açılmaz). Yayında yalnızca kod vardır, veri yoktur.
 
 Her güncellemede:
 

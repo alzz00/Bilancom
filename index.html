@@ -208,6 +208,9 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .delta.down { color: var(--crit); }
 .delta .muted, .delta.flat { color: var(--ink-3); font-weight: 500; }
 .cmp { display: grid; gap: 18px; }
+.welcome-text { margin: 14px 0 0; max-width: 34ch; font-size: 15.5px; color: var(--ink-2); }
+.welcome-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn.line { background: transparent; color: var(--ink); border: 1.5px solid rgba(230, 188, 98, .55); }
 .cmp-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
 .cmp-name { display: flex; align-items: center; gap: 8px; font-size: 15.5px; font-weight: 600; color: var(--ink-2); }
 .cmp-name small { font-size: 13.5px; font-weight: 500; color: var(--ink-3); }
@@ -626,13 +629,11 @@ const fxOf = code => FX.find(f => f.code === code) || null;
 const goldOf = code => GOLD.find(g => g.code === code) || null;
 const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
 
-const APP_VERSION = '2026.09.27-1605';
+const APP_VERSION = '2026.09.27-1615';
 const KEY = 'hd.defter.v1';
 const PKEY = 'hd.fiyat.v1';
 const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
 const PRICE_TTL = 15 * 60 * 1000;
-// Used only to value the example figures before live prices arrive.
-const SAMPLE_PRICES = { USD: 48.85, EUR: 55.4, GRA: 6740, CEYREKALTIN: 10722 };
 
 const S = {
   data: null,
@@ -918,45 +919,9 @@ async function refreshPrices(force) {
   }
 }
 
-/* ---------- example data ---------- */
-function sampleData(now) {
-  const mk = (id, kind, title, unit, qty, extra) => {
-    const a = { id, kind, title, unit, qty, price: null, sub: null, ...extra };
-    a.savedValue = unit === 'TRY' ? qty : qty * (SAMPLE_PRICES[unit] || 0);
-    return a;
-  };
-  const assets = [
-    mk('s1', 'banka', 'Vadeli hesap · Enpara', 'TRY', 120000),
-    mk('s2', 'altin', 'Düğün altınları', 'CEYREKALTIN', 6),
-    mk('s3', 'yatirim', 'BES', 'TRY', 67300, { sub: 'bes' }),
-    mk('s4', 'altin', 'Gram altın', 'GRA', 8),
-    mk('s5', 'doviz', 'Dolar birikimi', 'USD', 850),
-    mk('s6', 'banka', 'Maaş hesabı · Ziraat', 'TRY', 38500),
-    mk('s7', 'nakit', 'Cüzdan', 'TRY', 4250),
-  ];
-  const debts = [
-    { id: 't1', bank: 'Garanti BBVA', kind: 'kart', note: 'Bonus', total: 18450, minimum: 3690, dueDay: 5, paidFor: null },
-    { id: 't2', bank: 'Garanti BBVA', kind: 'kmh', note: '', total: 3100, minimum: 620, dueDay: 5, paidFor: null },
-    { id: 't3', bank: 'Yapı Kredi', kind: 'kart', note: 'World', total: 7200, minimum: 1440, dueDay: 12, paidFor: null },
-    { id: 't4', bank: 'İş Bankası', kind: 'kredi', note: 'İhtiyaç kredisi', total: 64000, minimum: 5850, dueDay: 20, paidFor: null },
-  ];
-  debts[3].paidFor = cycleKey(debts[3], now);
-  const t = totals(assets, debts);
-  const factors = [0.84, 0.86, 0.88, 0.91, 0.95];
-  const history = factors.map((f, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - (factors.length - i), 1);
-    const debt = Math.round(t.debts + (factors.length - i) * 1400);
-    const net = Math.round(t.net * f);
-    return { id: monthKey(d), net, assets: net + debt, debts: debt, monthly: 11600 };
-  });
-  return { assets, debts, history, sample: true };
-}
-
-const isSample = () => !S.data.assets.length && !S.data.debts.length && !Object.keys(S.data.history).length;
 function viewData() {
-  if (isSample()) return sampleData(new Date());
   return {
-    assets: S.data.assets, debts: S.data.debts, sample: false,
+    assets: S.data.assets, debts: S.data.debts,
     history: Object.entries(S.data.history).map(([id, v]) => ({ id, ...v })),
   };
 }
@@ -1014,7 +979,6 @@ function renderBanner() {
   if (S.storageBlocked) { pill = 'Uyarı'; text = 'Bu tarayıcıda kayıt kapalı; girdiklerin saklanmaz.'; }
   else if (S.recovered) { pill = 'Uyarı'; text = 'Kayıtlı veriler okunamadı. Yedeğin varsa Ayarlar’dan geri yükle.'; action = ['Ayarlar', openSettings]; }
   else if (S.inSafari) { pill = 'Safari'; text = 'Safari’de açıksın. Buraya girdiklerin ana ekrandaki uygulamaya geçmez; uygulamayı ana ekrandan aç.'; }
-  else if (isSample()) { pill = 'Örnek'; text = 'Bunlar örnek rakamlar. İlk kaydını eklediğinde kaybolur.'; action = ['İlk kaydım', openChooser]; }
   else if (S.tab === 'ozet' && needsBackup()) {
     pill = 'Yedek';
     const days = S.data.lastBackup ? Math.floor((Date.now() - S.data.lastBackup) / 864e5) : 0;
@@ -1026,14 +990,27 @@ function renderBanner() {
   b.replaceChildren(
     h('span', { class: 'pill' }, pill),
     h('p', null, text),
-    ...(action ? [h('button', { class: 'btn primary sm', type: 'button', onclick: action[1] }, action[0] === 'İlk kaydım' ? icon('plus') : null, action[0])] : []),
+    ...(action ? [h('button', { class: 'btn primary sm', type: 'button', onclick: action[1] }, action[0])] : []),
   );
 }
 
 /* summary */
 function renderSummary(d) {
+  // Nothing entered yet: a clean start with the two ways in, plus today's prices.
+  if (!d.assets.length && !d.debts.length) return h('div', { class: 'dash' }, welcomeCard(), marketCard(d));
   const t = totals(d.assets, d.debts);
   return h('div', { class: 'dash' }, heroCard(d, t), payCard(d), distCard(d), marketCard(d), trendCard(d, t));
+}
+
+function welcomeCard() {
+  return h('section', { class: 'card hero span2', 'aria-label': 'Net birikim' },
+    h('div', null,
+      h('div', { class: 'hero-label' }, 'Net birikim'),
+      bigMoney(0, 'hero-num'),
+      h('p', { class: 'welcome-text' }, 'İlk kaydını ekle; varlıkların, borçların ve net birikimin burada görünsün.')),
+    h('div', { class: 'welcome-btns' },
+      h('button', { class: 'btn primary', type: 'button', onclick: () => openAsset(null) }, icon('plus'), 'Varlık ekle'),
+      h('button', { class: 'btn line', type: 'button', onclick: () => openDebt(null) }, icon('plus'), 'Borç ekle')));
 }
 
 function prevMonth(history, now) {
@@ -1095,7 +1072,7 @@ function payCard(d) {
     h('div', { class: 'meter', role: 'progressbar', 'aria-label': 'Ödenen oran', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': Math.round(pct) },
       h('div', { style: `width:${pct}%` })),
     h('div', { class: 'pay-cap' }, `${money(paid)} ödendi · ${money(total - paid)} kaldı`),
-    h('ul', { class: 'plist' }, items.map(i => payRow(i, d.sample))));
+    h('ul', { class: 'plist' }, items.map(payRow)));
   return card;
 }
 
@@ -1108,7 +1085,7 @@ function dueChip(i) {
   return chip('plain', null, `${i.days} gün`);
 }
 
-function payRow(i, sample) {
+function payRow(i) {
   const k = dkind(i.x.kind);
   const sub = [k.label];
   if (i.due) sub.push(`${i.due.getDate()} ${AYK[i.due.getMonth()]}`);
@@ -1116,7 +1093,7 @@ function payRow(i, sample) {
     h('button', {
       class: 'chk', type: 'button', 'aria-pressed': String(i.paid),
       'aria-label': `${i.x.bank} ${k.label}: ${i.paid ? 'ödenmedi yap' : 'ödendi olarak işaretle'}`,
-      onclick: () => togglePaid(i, sample),
+      onclick: () => togglePaid(i),
     }, h('span', null, icon('check'))),
     h('div', { class: 'pmain' }, h('div', { class: 'pname' }, i.x.bank), h('div', { class: 'psub' }, sub.join(' · '))),
     h('div', { class: 'pright' }, h('div', { class: 'pamt' }, money(i.x.minimum)), dueChip(i)));
@@ -1368,7 +1345,7 @@ function renderAssets(d) {
   const list = d.assets.slice().sort((a, b) => assetValue(b) - assetValue(a));
   wrap.append(h('section', { class: 'card rows-card' }, h('ul', { class: 'rows' }, list.map(a => {
     const k = akind(a.kind);
-    return h('li', null, h('button', { class: 'row', type: 'button', onclick: () => (d.sample ? sampleTap() : openAsset(a)) },
+    return h('li', null, h('button', { class: 'row', type: 'button', onclick: () => openAsset(a) },
       h('span', { class: 'ico' }, icon(k.icon)),
       h('span', { class: 'rmain' }, h('span', { class: 'rtitle' }, a.title), h('span', { class: 'rsub' }, assetSub(a))),
       h('span', { class: 'ramt' }, money(assetValue(a)))));
@@ -1401,16 +1378,16 @@ function renderDebts(d) {
     .sort((a, b) => b.total - a.total);
   wrap.append(h('section', { class: 'card rows-card' }, list.map(g => h('div', { class: 'group' },
     h('div', { class: 'group-head' }, h('span', { class: 'group-name' }, g.name), h('span', { class: 'group-total' }, money(g.total))),
-    h('ul', { class: 'rows' }, g.items.slice().sort((a, b) => b.total - a.total).map(x => debtRow(x, d.sample)))))));
+    h('ul', { class: 'rows' }, g.items.slice().sort((a, b) => b.total - a.total).map(debtRow))))));
   return wrap;
 }
 
-function debtRow(x, sample) {
+function debtRow(x) {
   const k = dkind(x.kind);
   const sub = [];
   if (x.minimum > 0) sub.push(`${k.short} ${money(x.minimum)}`);
   if (x.dueDay) sub.push(`her ayın ${ordinal(x.dueDay)}`);
-  return h('li', null, h('button', { class: 'row', type: 'button', onclick: () => (sample ? sampleTap() : openDebt(x)) },
+  return h('li', null, h('button', { class: 'row', type: 'button', onclick: () => openDebt(x) },
     h('span', { class: 'ico debt' }, icon(k.icon)),
     h('span', { class: 'rmain' },
       h('span', { class: 'rtitle' }, k.label + (x.note ? ' · ' + x.note : '')),
@@ -1802,10 +1779,7 @@ function openDebt(x) {
   openSheet(isNew ? 'Yeni borç' : 'Borcu düzenle', form, bank);
 }
 
-function sampleTap() { toast('Bu bir örnek. Kendi kaydını + düğmesiyle ekle.'); }
-
-function togglePaid(i, sample) {
-  if (sample) { sampleTap(); return; }
+function togglePaid(i) {
   mutate(d => {
     const x = d.debts.find(y => y.id === i.x.id);
     if (x) { x.paidFor = i.paid ? null : i.key; x.updatedAt = Date.now(); }
