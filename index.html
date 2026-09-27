@@ -516,16 +516,14 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .steps b { font-weight: 700; }
 .step-ico { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 13px; background: var(--ico-bg); color: var(--accent-text); }
 
-/* iPhone home-screen app (iOS 26+): while a page can't scroll, the layout viewport ends one status-bar
-   height short of the screen, so bars pinned with bottom: 0 float. 100lvh is the full screen, so pin
-   bottom bars and the sheet backdrop from the top edge instead. */
+/* iPhone home-screen app (iOS 26+): the page reaches the bottom of the screen only while it can scroll.
+   On a short page the last status-bar height is left out, so bottom bars float or get cut off.
+   Keeping every page scrollable by one pixel, even while a sheet is open, keeps the full screen. */
 @media (display-mode: standalone) {
-  .scrim { bottom: auto; height: 100vh; height: 100lvh; }
-}
-@media (display-mode: standalone) and (max-width: 759px) {
-  .tabs { top: 100vh; top: 100lvh; bottom: auto; transform: translateY(-100%); }
-  .toast { top: calc(100lvh - 96px - env(safe-area-inset-bottom, 0px)); bottom: auto; transform: translate(-50%, calc(8px - 100%)); }
-  .toast.show { transform: translate(-50%, -100%); }
+  @supports (-webkit-touch-callout: none) {
+    html { min-height: calc(100% + 1px); }
+    html.locked { overflow: visible; }
+  }
 }
 
 .loading { padding: 64px 0; text-align: center; font-size: 16px; color: var(--ink-3); }
@@ -735,7 +733,7 @@ const fxOf = code => FX.find(f => f.code === code) || null;
 const goldOf = code => GOLD.find(g => g.code === code) || null;
 const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
 
-const APP_VERSION = '2026.09.27-1822';
+const APP_VERSION = '2026.09.27-1827';
 const KEY = 'hd.defter.v1';
 const PKEY = 'hd.fiyat.v1';
 const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
@@ -1712,6 +1710,8 @@ function openSheet(title, body, focusEl, cls) {
     if (e.target.matches('input, select')) setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300);
   });
   const scrim = h('div', { class: 'scrim', onclick: e => { if (e.target === scrim) closeSheet(); } }, sheet);
+  // On the iPhone app the page behind stays scrollable, so a drag on the dimmed area must not move it.
+  scrim.addEventListener('touchmove', e => { if (!sheet.contains(e.target)) e.preventDefault(); }, { passive: false });
   document.body.append(scrim);
   sheetEl = scrim;
   document.documentElement.classList.add('locked');
