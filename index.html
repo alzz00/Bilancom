@@ -715,6 +715,16 @@ const INV = [
   { id: 'kripto', label: 'Kripto' },
   { id: 'diger', label: 'Diğer' },
 ];
+// A bank account can be in lira, a foreign currency or gold grams; the last two are valued at today's buying price.
+const BANK_CUR = [
+  { id: 'TRY', label: 'TL', acc: 'TL hesabı' },
+  { id: 'USD', label: 'Dolar', acc: 'Dolar hesabı' },
+  { id: 'EUR', label: 'Euro', acc: 'Euro hesabı' },
+  { id: 'GBP', label: 'Sterlin', acc: 'Sterlin hesabı' },
+  { id: 'CHF', label: 'Frank', acc: 'Frank hesabı' },
+  { id: 'GRA', label: 'Altın (gram)', acc: 'Altın hesabı' },
+];
+const bankCur = id => BANK_CUR.find(c => c.id === id) || null;
 // Choices offered while typing. Stocks and funds load from listeler/*.json the first time they are needed.
 const BANK_LIST = ['Ziraat Bankası', 'İş Bankası', 'Garanti BBVA', 'Yapı Kredi', 'Akbank', 'VakıfBank', 'Halkbank', 'QNB',
   'DenizBank', 'Enpara', 'TEB', 'ING', 'Kuveyt Türk', 'Türkiye Finans', 'Albaraka Türk', 'Vakıf Katılım', 'Ziraat Katılım',
@@ -733,7 +743,7 @@ const fxOf = code => FX.find(f => f.code === code) || null;
 const goldOf = code => GOLD.find(g => g.code === code) || null;
 const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
 
-const APP_VERSION = '2026.09.27-1827';
+const APP_VERSION = '2026.09.27-1838';
 const KEY = 'hd.defter.v1';
 const PKEY = 'hd.fiyat.v1';
 const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
@@ -882,7 +892,8 @@ function cleanAsset(o) {
   let unit = typeof o.unit === 'string' ? o.unit : 'TRY';
   if (mode === 'fx' && !fxOf(unit)) unit = 'USD';
   if (mode === 'gold' && !goldOf(unit)) unit = 'GRA';
-  if (mode === 'tl' || (mode === 'inv' && unit !== 'MANUAL')) unit = 'TRY';
+  if (mode === 'tl' && !(kind === 'banka' && bankCur(unit))) unit = 'TRY';
+  if (mode === 'inv' && unit !== 'MANUAL') unit = 'TRY';
   return {
     id: String(o.id), kind, unit,
     title: str(o.title, 80) || defaultTitle(kind, unit),
@@ -1519,7 +1530,8 @@ function drawChart(box) {
 /* assets tab */
 function assetSub(a) {
   const mode = akind(a.kind).mode;
-  const missing = (mode === 'fx' || mode === 'gold') && priceOf(a.unit) == null ? ' · fiyat bekleniyor' : '';
+  const priced = a.unit !== 'TRY' && a.unit !== 'MANUAL';
+  const missing = priced && priceOf(a.unit) == null ? ' · fiyat bekleniyor' : '';
   // Name the currency or gold type only when the title doesn't already say it.
   if (mode === 'fx') { const f = fxOf(a.unit); return `${a.title === f.label ? '' : f.label + ' · '}${fmtQty(a.qty)} ${f.sym}${missing}`; }
   if (mode === 'gold') { const g = goldOf(a.unit); return `${a.title === g.title ? '' : g.title + ' · '}${fmtQty(a.qty)} ${g.unit}${missing}`; }
@@ -1529,7 +1541,8 @@ function assetSub(a) {
     if (a.unit === 'MANUAL') return `${s} · ${fmtQty(a.qty)} adet × ${money2(a.price)}`;
     return s === a.title ? '' : s;
   }
-  // Plain TL items need no sub-line: the group heading already names the kind.
+  // A bank account in foreign currency or gold says so; plain TL items need no sub-line under their group heading.
+  if (priced) return `${bankCur(a.unit).acc} · ${fmtQty(a.qty)} ${a.unit === 'GRA' ? 'gram' : fxOf(a.unit).sym}${missing}`;
   return '';
 }
 
@@ -1888,6 +1901,7 @@ function openAsset(a) {
     kind: a ? a.kind : 'banka',
     fx: mode0 === 'fx' ? a.unit : 'USD',
     gold: mode0 === 'gold' ? a.unit : 'GRA',
+    cur: a && a.kind === 'banka' ? a.unit : 'TRY',
     sub: a && a.sub ? a.sub : 'hisse',
     inv: a && a.unit === 'MANUAL' ? 'adet' : 'tutar',
     code: (a && a.code) || null,
@@ -1931,11 +1945,12 @@ function openAsset(a) {
     const mode = akind(st.kind).mode;
     const q = parseAmount(qty.input.value);
     let parts = null;
-    if (mode === 'fx' || mode === 'gold') {
-      const code = mode === 'fx' ? st.fx : st.gold;
+    // Currency, gold, and bank accounts held in either are valued at today's buying price.
+    const code = mode === 'fx' ? st.fx : mode === 'gold' ? st.gold : st.kind === 'banka' && st.cur !== 'TRY' ? st.cur : null;
+    if (code) {
+      const f = fxOf(code), g = goldOf(code);
+      const one = f ? `1 ${f.sym}` : g.unit === 'gram' ? '1 gram' : `1 ${g.label.toLocaleLowerCase('tr')}`;
       const p = priceOf(code);
-      const g = goldOf(code);
-      const one = mode === 'fx' ? `1 ${fxOf(code).sym}` : g.unit === 'gram' ? '1 gram' : `1 ${g.label.toLocaleLowerCase('tr')}`;
       parts = p == null
         ? [h('span', null, 'Fiyat henüz alınamadı. İnternete bağlanınca TL karşılığı kendiliğinden hesaplanır.')]
         : [h('strong', null, Number.isFinite(q) ? '≈ ' + money(q * p) : '≈ ₺—'), h('span', null, ` · ${one} = ${money2(p)} (alış)`)];
@@ -1982,9 +1997,20 @@ function openAsset(a) {
       } else {
         parts.push(field('Güncel değer', tl.wrap, 'f-amount'));
       }
+    } else if (st.kind === 'banka') {
+      parts.push(titleField('Hangi banka?', 'Yaz ya da seç: Ziraat, Garanti…'));
+      parts.push(field('Hesabın para birimi', chipGroup(BANK_CUR.map(c => {
+        const f = fxOf(c.id);
+        return { id: c.id, label: c.label, badge: f && f.sym.length === 1 ? f.sym : null };
+      }), st.cur, v => { st.cur = v; err.textContent = ''; layout(); }, 'Hesabın para birimi')));
+      if (st.cur === 'TRY') parts.push(field('Tutar', tl.wrap, 'f-amount'));
+      else {
+        qty.set(st.cur === 'GRA' ? 'Kaç gram?' : 'Hesaptaki miktar', st.cur === 'GRA' ? 'gram' : fxOf(st.cur).sym);
+        parts.push(qty.field, preview);
+      }
     } else {
-      const ph = { banka: 'Yaz ya da seç: Ziraat, Garanti…', nakit: 'örn. Cüzdan', ev: 'örn. Daire', arac: 'örn. Araba' }[st.kind] || 'örn. Alacak';
-      parts.push(titleField(st.kind === 'banka' ? 'Hangi banka?' : 'Başlık', ph), field('Tutar', tl.wrap, 'f-amount'));
+      const ph = { nakit: 'örn. Cüzdan', ev: 'örn. Daire', arac: 'örn. Araba' }[st.kind] || 'örn. Alacak';
+      parts.push(titleField('Başlık', ph), field('Tutar', tl.wrap, 'f-amount'));
     }
     dyn.replaceChildren(...parts);
     updatePreview();
@@ -2016,9 +2042,17 @@ function openAsset(a) {
       if (!name) return fail('Ürünün adını yaz. Örneğin: THYAO.', title);
       if (!Number.isFinite(q)) return fail('Adedi rakamla yaz.', qty.input);
       if (!Number.isFinite(pr)) return fail('Birim fiyatı rakamla yaz. Örneğin: 312,50', price.input);
+    } else if (st.kind === 'banka' && st.cur !== 'TRY') {
+      unit = st.cur;
+      q = parseAmount(qty.input.value);
+      if (!name) return fail('Bankanın adını yaz. Örneğin: Ziraat Bankası.', title);
+      if (!Number.isFinite(q)) return fail(unit === 'GRA' ? 'Gramı rakamla yaz. Örneğin: 25' : 'Miktarı rakamla yaz. Örneğin: 1.200', qty.input);
     } else {
       q = parseAmount(tl.input.value);
-      if (!name) return fail(mode === 'inv' ? 'Ürünün adını yaz. Örneğin: BES.' : 'Bir başlık yaz. Örneğin: Maaş hesabı.', title);
+      if (!name) {
+        return fail(mode === 'inv' ? 'Ürünün adını yaz. Örneğin: BES.'
+          : st.kind === 'banka' ? 'Bankanın adını yaz. Örneğin: Ziraat Bankası.' : 'Bir başlık yaz. Örneğin: Maaş hesabı.', title);
+      }
       if (!Number.isFinite(q)) return fail('Tutarı rakamla yaz. Örneğin: 12.500', tl.input);
     }
     const now = Date.now();
@@ -2342,7 +2376,8 @@ function openBulk() {
         const f = fxOf(a.unit), gd = goldOf(a.unit);
         const p = priceOf(a.unit);
         cell = addInput(ref, a.qty, `${a.title}, yeni miktar`, f ? f.sym : gd.unit, v => (p != null ? (v - a.qty) * p : 0), (x, v) => { x.qty = round4(v); });
-        parts.push(h('div', { class: 'bulk-row' }, nameCell(k.icon, false, a.title, `≈ ${money(assetValue(a))}`), cell.wrap, cell.diff));
+        const acc = a.kind === 'banka' ? bankCur(a.unit).acc + ' · ' : '';
+        parts.push(h('div', { class: 'bulk-row' }, nameCell(k.icon, false, a.title, `${acc}≈ ${money(assetValue(a))}`), cell.wrap, cell.diff));
       }
     }
   }
