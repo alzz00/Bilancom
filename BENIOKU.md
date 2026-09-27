@@ -1,7 +1,11 @@
 # Bilancom
 
 Kişisel bilanço: varlıklar (TL, döviz, altın çeşitleri, yatırım ürünleri), banka banka borçlar,
-asgari ödemeler ve net birikim. iPhone'da ana ekrana eklenip uygulama gibi kullanılır.
+asgari ödemeler, ödeme takvimi, hedefler ve net birikim. iPhone'da ana ekrana eklenip uygulama gibi kullanılır.
+
+- Özet'teki **Güncelle**, elle girilen bütün rakamları tek ekranda açar; sadece değişenler yazılır.
+- Bir borca dokunup **Ödeme gir** denince ödenen tutar toplam borçtan düşer. Ödemeler'deki yuvarlak da aynı ekranı açar;
+  işaret geri alınınca tutar borca geri eklenir.
 
 - **Veriler yalnızca telefonda saklanır.** Hiçbir sunucuya gönderilmez; Claude'da da bilgisayarda da durmaz.
 - Altın ve döviz fiyatları `finans.truncgil.com` adresinden çekilir (alış fiyatı). Bu isteğe kişisel veri eklenmez.

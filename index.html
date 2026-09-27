@@ -142,15 +142,12 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .tab-ico { width: 58px; height: 30px; border-radius: 999px; display: grid; place-items: center; transition: background-color .2s; }
 .tab[aria-current="page"] { color: var(--accent-text); }
 .tab[aria-current="page"] .tab-ico { background: var(--accent-soft); }
-.tab-add { color: var(--accent-text); }
-.tab-add .tab-ico { width: 48px; background: var(--gold); color: var(--accent-ink); }
 @media (min-width: 760px) {
   .tabs { position: static; width: max-content; margin: 22px auto 0; padding: 5px; border: 0; border-radius: 999px; background: var(--surface-2); }
   .tab { flex: none; flex-direction: row; gap: 8px; min-height: 42px; padding: 0 18px 0 12px; border-radius: 999px; font-size: 15.5px; color: var(--ink-2); }
   .tab-ico { width: auto; height: auto; }
   .tab[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
   .tab[aria-current="page"] .tab-ico { background: none; color: var(--accent-text); }
-  .tab-add { display: none; }
 }
 
 .view { margin-top: 18px; }
@@ -208,6 +205,11 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .delta.down { color: var(--crit); }
 .delta .muted, .delta.flat { color: var(--ink-3); font-weight: 500; }
 .cmp { display: grid; gap: 18px; }
+.hero-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.hero-acts { display: flex; gap: 8px; flex: none; margin: -4px -4px 0 0; }
+.hero-btn { height: 38px; min-width: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 12px 0 10px; border: 1px solid rgba(230, 188, 98, .38); border-radius: 12px; background: rgba(230, 188, 98, .12); color: #F2D08A; font-size: 14.5px; font-weight: 650; }
+.hero-btn.sq { width: 38px; padding: 0; }
+.hero-btn svg.i { width: 19px; height: 19px; stroke-width: 2.1; }
 .welcome-text { margin: 14px 0 0; max-width: 34ch; font-size: 15.5px; color: var(--ink-2); }
 .welcome-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .btn.line { background: transparent; color: var(--ink); border: 1.5px solid rgba(230, 188, 98, .55); }
@@ -242,7 +244,8 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .chk { width: 44px; height: 44px; flex: none; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; margin-left: -8px; }
 .chk span { width: 26px; height: 26px; display: grid; place-items: center; border: 2px solid var(--ink-3); border-radius: 50%; color: transparent; transition: background-color .15s, border-color .15s; }
 .chk span svg.i { width: 17px; height: 17px; stroke-width: 2.6; }
-.chk[aria-pressed="true"] span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.chk[aria-pressed="true"] span, .chk.on span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.chk.fixed { cursor: default; opacity: .5; }
 .pmain { flex: 1; min-width: 0; }
 .pname { font-size: 16px; font-weight: 650; overflow-wrap: anywhere; }
 .psub { font-size: 14px; color: var(--ink-3); }
@@ -330,7 +333,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .group-name { font-family: var(--font-display); font-size: 17.5px; font-weight: 650; overflow-wrap: anywhere; }
 .group-total { font-weight: 650; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-/* floating add button (wide screens; phones use "Ekle" in the bottom bar) */
+/* floating add button (wide screens; phones use the + on the net-worth card) */
 .fab { display: none; position: fixed; z-index: 31; bottom: 28px; right: max(28px, calc((100vw - 1000px) / 2 + 28px)); width: 60px; height: 60px; place-items: center; border: 0; border-radius: 20px; background: var(--accent); color: var(--accent-ink); box-shadow: var(--fab-shadow); }
 .fab svg.i { width: 28px; height: 28px; stroke-width: 2.2; }
 @media (min-width: 760px) { .fab { display: grid; } }
@@ -385,6 +388,10 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface-2); max-width: 100%; }
 .seg button { height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: none; color: var(--ink-2); font-size: 15px; font-weight: 650; }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.seg.wide { display: flex; width: 100%; }
+.seg.wide button { flex: 1; padding: 0 8px; }
+.pair { display: grid; grid-template-columns: 1.3fr 1fr; gap: 10px; }
+.input.bad { border-color: var(--crit); }
 .theme-field { margin-top: 12px; }
 .theme-field .seg { display: flex; width: 100%; }
 .theme-field .seg button { flex: 1; }
@@ -400,6 +407,8 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .choice .ico { width: 52px; height: 52px; border-radius: 16px; }
 .choice strong { display: block; font-size: 17px; }
 .choice .s { display: block; font-size: 14.5px; color: var(--ink-3); }
+.pay-entry { width: 100%; margin-top: 14px; border-color: var(--debt-soft); }
+.opts.quick { margin-top: 10px; }
 
 /* settings */
 .set-list { margin-top: 12px; }
@@ -412,6 +421,78 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .set-row.danger .ico { background: var(--crit-soft); color: var(--crit); }
 .note-box { display: flex; gap: 12px; margin-top: 16px; padding: 14px; border-radius: 16px; background: var(--surface-2); font-size: 14.5px; color: var(--ink-2); }
 .note-box svg.i { color: var(--accent-text); }
+
+/* payments calendar */
+.seg.small { padding: 3px; border-radius: 12px; }
+.seg.small button { height: 32px; padding: 0 11px; border-radius: 9px; font-size: 13.5px; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.cal-title { text-align: center; font-weight: 700; font-size: 16.5px; }
+.cal-title small { display: block; font-size: 13.5px; font-weight: 500; color: var(--ink-3); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal-dow { padding: 2px 0 6px; text-align: center; font-size: 12.5px; font-weight: 650; color: var(--ink-3); }
+.cal-day { position: relative; aspect-ratio: 1 / 1; min-width: 0; display: grid; place-items: center; padding: 0; border: 0; border-radius: 12px; background: none; font-size: 15px; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.cal-day.past { opacity: .5; }
+.cal-day.has { background: var(--accent-soft); color: var(--ink); opacity: 1; }
+.cal-day.paid { background: var(--good-soft); }
+.cal-day.today { box-shadow: inset 0 0 0 2px var(--accent); }
+.cal-day.sel { background: var(--accent); color: var(--accent-ink); }
+.cal-day .dot { position: absolute; bottom: 5px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--accent); }
+.cal-day.paid .dot { background: var(--good); }
+.cal-day.sel .dot { background: var(--accent-ink); }
+.cal-list { margin-top: 12px; border-top: 1px solid var(--line); }
+.cal-list .plist { margin-top: 0; }
+
+/* goals */
+.goal-grid { display: grid; gap: 14px; }
+@media (min-width: 760px) { .goal-grid { grid-template-columns: 1fr 1fr; } }
+.goal { width: 100%; display: flex; align-items: center; gap: 16px; text-align: left; color: inherit; }
+.ring { position: relative; display: block; width: 78px; height: 78px; flex: none; }
+.ring svg { display: block; width: 78px; height: 78px; transform: rotate(-90deg); }
+.ring .trk { fill: none; stroke: var(--surface-2); stroke-width: 8; }
+.ring .val { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; }
+.ring.done .val { stroke: var(--good); }
+.ring span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 16px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.goal-main { flex: 1; min-width: 0; }
+.goal-title { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; overflow-wrap: anywhere; }
+.goal-title svg.i { width: 20px; height: 20px; color: var(--accent-text); }
+.goal-amt { display: block; margin-top: 5px; font-size: 15px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.goal-amt strong { color: var(--ink); }
+.goal-sub { display: block; margin-top: 6px; font-size: 14px; color: var(--ink-3); }
+.goal-sub > span { display: block; }
+.goal-sub .chip { display: inline-flex; }
+.goal-empty { display: grid; justify-items: start; gap: 12px; }
+.goal-empty .ico { width: 56px; height: 56px; border-radius: 17px; }
+.goal-empty .ico svg.i { width: 28px; height: 28px; }
+.pick-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* bulk update sheet */
+.bulk-intro { margin: 8px 0 0; font-size: 14.5px; color: var(--ink-3); }
+.bulk-h { margin: 20px 0 2px; font-size: 13px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+.bulk-row { display: grid; grid-template-columns: minmax(0, 1fr) 148px; align-items: center; gap: 4px 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.bulk-h + .bulk-row { border-top: 0; }
+.bulk-name { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.bulk-name .mini-ico.debt { background: var(--debt-soft); color: var(--debt); }
+.bulk-t { min-width: 0; }
+.bulk-t strong { display: block; font-size: 15.5px; font-weight: 650; line-height: 1.3; overflow-wrap: anywhere; }
+.bulk-t small { display: block; font-size: 13px; color: var(--ink-3); }
+.bulk-row .money > span { left: 12px; font-size: 16px; }
+.bulk-row .input { height: 46px; padding: 0 10px 0 28px; font-size: 17px; font-weight: 650; font-variant-numeric: tabular-nums; border-radius: 12px; }
+.bulk-row .qty .input { padding: 0 52px 0 12px; }
+.bulk-row .qty .suffix { right: 12px; font-size: 14px; }
+.bulk-two { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+.bulk-two .cap { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 650; color: var(--ink-3); }
+.bulk-diff { grid-column: 2; justify-self: end; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.bulk-two .bulk-diff { display: block; margin-top: 4px; }
+.bulk-diff.up, .bulk-net em.up { color: var(--good); }
+.bulk-diff.down, .bulk-net em.down { color: var(--crit); }
+/* The save bar stays under the thumb while the list scrolls. */
+.sheet.has-foot { padding-bottom: 0; }
+.bulk-foot { position: sticky; z-index: 2; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 16px -20px 0; padding: 12px 20px calc(14px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--surface); }
+@media (min-width: 760px) { .bulk-foot { margin: 16px -28px 0; padding: 14px 28px 22px; } }
+.bulk-net { min-width: 0; font-size: 13.5px; color: var(--ink-3); }
+.bulk-net div { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 8px; }
+.bulk-net strong { font-size: 19px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.bulk-net em { font-style: normal; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* new version notice */
 .update-bar { position: fixed; z-index: 85; left: 50%; top: calc(10px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); display: flex; align-items: center; gap: 14px; width: max-content; max-width: calc(100% - 32px); padding: 8px 8px 8px 16px; border-radius: 16px; background: var(--ink); color: var(--bg); box-shadow: 0 12px 30px -12px rgba(0, 0, 0, .45); font-size: 15px; font-weight: 650; animation: rise .24s cubic-bezier(.2, .8, .2, 1); }
@@ -470,9 +551,9 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
       <span class="tab-ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.8" y="5.5" width="18.4" height="13" rx="2.2"/><path d="M2.8 9.8h18.4"/><path d="M6.5 15h3.5"/></svg></span>
       <span>Borçlar</span>
     </button>
-    <button class="tab tab-add" id="navAdd" type="button" aria-label="Yeni kayıt ekle">
-      <span class="tab-ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
-      <span>Ekle</span>
+    <button class="tab" type="button" data-tab="hedef">
+      <span class="tab-ico"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1"/></svg></span>
+      <span>Hedefler</span>
     </button>
   </nav>
 
@@ -541,6 +622,14 @@ const ICONS = {
   kmh: '<rect x="3" y="5.5" width="18" height="13" rx="2.2"/><path d="M8.5 12h7"/>',
   person: '<circle cx="12" cy="8.2" r="3.4"/><path d="M5.2 19.6c.9-3.5 3.6-5.4 6.8-5.4s5.9 1.9 6.8 5.4"/>',
   wallet: '<path d="M4.2 7.4h14.3a1.6 1.6 0 0 1 1.6 1.6v9.3a1.6 1.6 0 0 1-1.6 1.6H5.8a1.6 1.6 0 0 1-1.6-1.6z"/><path d="M4.2 7.4 15.4 4.3v3.1"/><path d="M16.2 13.7h.01"/>',
+  target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1"/>',
+  flag: '<path d="M5.5 20.5V4"/><path d="M5.5 4.5h11l-2.2 3.7 2.2 3.8h-11"/>',
+  umbrella: '<path d="M12 3.5a8.5 8.5 0 0 1 8.5 8.5h-17A8.5 8.5 0 0 1 12 3.5z"/><path d="M12 12v6.5a2 2 0 0 1-4 0"/>',
+  cap: '<path d="M2.5 9.5 12 5l9.5 4.5L12 14z"/><path d="M6.5 11.6v4.2c0 1.3 2.5 2.7 5.5 2.7s5.5-1.4 5.5-2.7v-4.2"/><path d="M21.5 9.5v5"/>',
+  shield: '<path d="M12 3.5 19 6v5.5c0 4.3-3 7.6-7 9-4-1.4-7-4.7-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/>',
+  chevL: '<path d="M14.5 6 8.5 12l6 6"/>',
+  chevR: '<path d="M9.5 6l6 6-6 6"/>',
+  pencil: '<path d="M4.5 19.5l.9-4.2L15.8 4.9a1.9 1.9 0 0 1 2.7 0l.6.6a1.9 1.9 0 0 1 0 2.7L8.7 18.6z"/><path d="M13.9 6.8l3.3 3.3"/>',
   eye: '<path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',
   eyeOff: '<path d="M2.5 12S6 5.8 12 5.8c1.7 0 3.2.5 4.5 1.2M21.5 12s-1.2 2.2-3.5 3.9M9.5 17.8c.8.3 1.6.4 2.5.4"/><path d="M4 4l16 16"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.4 7.4 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.4 7.4 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.4 7.4 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 2.6-1.5l2.4 1 2-3.4z"/>',
@@ -629,7 +718,7 @@ const fxOf = code => FX.find(f => f.code === code) || null;
 const goldOf = code => GOLD.find(g => g.code === code) || null;
 const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
 
-const APP_VERSION = '2026.09.27-1615';
+const APP_VERSION = '2026.09.27-1648';
 const KEY = 'hd.defter.v1';
 const PKEY = 'hd.fiyat.v1';
 const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
@@ -643,6 +732,9 @@ const S = {
   tab: 'ozet',
   hide: false,
   showTable: false,
+  payView: 'liste',
+  calOffset: 0,
+  calSel: null,
   inSafari: false,
   storageBlocked: false,
   recovered: false,
@@ -795,18 +887,41 @@ function cleanDebt(o) {
     total: Math.max(0, num(o.total)), minimum: Math.max(0, num(o.minimum)),
     dueDay: dd >= 1 && dd <= 31 ? dd : null,
     paidFor: typeof o.paidFor === 'string' ? o.paidFor.slice(0, 10) : null,
+    // What the marked payment took off the total, so un-ticking can put it back.
+    paidAmt: Math.max(0, num(o.paidAmt)),
     createdAt: num(o.createdAt), updatedAt: num(o.updatedAt),
   };
 }
 function cleanHist(v) {
   return v && typeof v === 'object' ? { assets: num(v.assets), debts: num(v.debts), net: num(v.net), monthly: num(v.monthly) } : null;
 }
-const emptyData = () => ({ v: 1, assets: [], debts: [], history: {}, lastBackup: 0, firstDataAt: 0 });
+const GOAL_ICONS = [
+  { id: 'ev', label: 'Ev', icon: 'house', title: 'Ev', ph: 'örn. Ev peşinatı' },
+  { id: 'araba', label: 'Araba', icon: 'car', title: 'Araba', ph: 'örn. Yeni araba' },
+  { id: 'tatil', label: 'Tatil', icon: 'umbrella', title: 'Tatil', ph: 'örn. Yaz tatili' },
+  { id: 'egitim', label: 'Eğitim', icon: 'cap', title: 'Eğitim', ph: 'örn. Yüksek lisans' },
+  { id: 'acil', label: 'Acil durum', icon: 'shield', title: 'Acil durum fonu', ph: 'örn. 6 aylık gider' },
+  { id: 'diger', label: 'Diğer', icon: 'flag', title: 'Hedef', ph: 'örn. Düğün' },
+];
+const goalIcon = id => GOAL_ICONS.find(g => g.id === id) || GOAL_ICONS[GOAL_ICONS.length - 1];
+function cleanGoal(o) {
+  if (!o || typeof o !== 'object' || !ID_RE.test(String(o.id))) return null;
+  return {
+    id: String(o.id), title: str(o.title, 60) || 'Hedef', icon: goalIcon(o.icon).id,
+    target: Math.max(0, num(o.target)),
+    source: o.source === 'secili' ? 'secili' : 'net',
+    assetIds: Array.isArray(o.assetIds) ? o.assetIds.filter(x => typeof x === 'string').slice(0, 60) : [],
+    deadline: typeof o.deadline === 'string' && /^\d{4}-\d{2}$/.test(o.deadline) ? o.deadline : null,
+    createdAt: num(o.createdAt), updatedAt: num(o.updatedAt),
+  };
+}
+const emptyData = () => ({ v: 1, assets: [], debts: [], goals: [], history: {}, lastBackup: 0, firstDataAt: 0 });
 function sanitizeData(o) {
   const d = emptyData();
   if (!o || typeof o !== 'object') return d;
   d.assets = (Array.isArray(o.assets) ? o.assets : []).map(cleanAsset).filter(Boolean);
   d.debts = (Array.isArray(o.debts) ? o.debts : []).map(cleanDebt).filter(Boolean);
+  d.goals = (Array.isArray(o.goals) ? o.goals : []).map(cleanGoal).filter(Boolean);
   if (o.history && typeof o.history === 'object') {
     for (const [k, v] of Object.entries(o.history)) {
       const c = cleanHist(v);
@@ -870,7 +985,7 @@ function assetValue(a) {
 function totals(assets, debts) {
   const a = sum(assets.map(assetValue));
   const d = sum(debts.map(x => x.total));
-  return { assets: a, debts: d, net: a - d, monthly: sum(debts.map(x => x.minimum || 0)) };
+  return { assets: a, debts: d, net: a - d, monthly: sum(debts.map(x => (x.total > 0 ? x.minimum || 0 : 0))) };
 }
 function recordHistory(d) {
   if (!d.assets.length && !d.debts.length && !Object.keys(d.history).length) return false;
@@ -921,7 +1036,7 @@ async function refreshPrices(force) {
 
 function viewData() {
   return {
-    assets: S.data.assets, debts: S.data.debts,
+    assets: S.data.assets, debts: S.data.debts, goals: S.data.goals,
     history: Object.entries(S.data.history).map(([id, v]) => ({ id, ...v })),
   };
 }
@@ -934,7 +1049,7 @@ function render() {
     if (t.dataset.tab === S.tab) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
   });
   const d = viewData();
-  $('#view').replaceChildren(S.tab === 'varlik' ? renderAssets(d) : S.tab === 'borc' ? renderDebts(d) : renderSummary(d));
+  $('#view').replaceChildren(S.tab === 'varlik' ? renderAssets(d) : S.tab === 'borc' ? renderDebts(d) : S.tab === 'hedef' ? renderGoals(d) : renderSummary(d));
   if (S.tab === 'ozet') drawChartSoon();
 }
 
@@ -1040,7 +1155,11 @@ function heroCard(d, t) {
     h('div', { class: 'bar ' + cls, style: `width:${(Math.max(0, v) / max) * 100}%` }));
   return h('section', { class: 'card hero span2', 'aria-label': 'Net birikim' },
     h('div', null,
-      h('div', { class: 'hero-label' }, 'Net birikim', t.net < 0 ? chip('crit', 'alert', 'Borç, varlıktan fazla') : null),
+      h('div', { class: 'hero-top' },
+        h('div', { class: 'hero-label' }, 'Net birikim', t.net < 0 ? chip('crit', 'alert', 'Borç, varlıktan fazla') : null),
+        h('div', { class: 'hero-acts' },
+          h('button', { class: 'hero-btn', type: 'button', onclick: openBulk }, icon('pencil'), 'Güncelle'),
+          h('button', { class: 'hero-btn sq', type: 'button', 'aria-label': 'Yeni kayıt ekle', title: 'Yeni kayıt ekle', onclick: openChooser }, icon('plus')))),
       bigMoney(t.net, 'hero-num'),
       delta),
     h('div', { class: 'cmp' },
@@ -1050,7 +1169,8 @@ function heroCard(d, t) {
 
 function payCard(d) {
   const now = new Date();
-  const items = d.debts.filter(x => x.minimum > 0).map(x => {
+  // A debt paid down to zero drops out once its paid cycle is over.
+  const items = d.debts.filter(x => x.minimum > 0 && (x.total > 0 || x.paidFor === cycleKey(x, now))).map(x => {
     const key = cycleKey(x, now);
     const due = x.dueDay ? nextDue(x.dueDay, now) : null;
     return { x, key, due, days: due ? daysBetween(today0(now), due) : null, paid: x.paidFor === key };
@@ -1060,9 +1180,15 @@ function payCard(d) {
   const paid = sum(items.filter(i => i.paid).map(i => i.x.minimum));
   const pct = total ? (paid / total) * 100 : 0;
   const card = h('section', { class: 'card', 'aria-labelledby': 'payT' },
-    h('div', { class: 'card-head' }, h('h2', { class: 'card-title', id: 'payT' }, 'Yaklaşan ödemeler'), h('span', { class: 'card-note' }, 'asgari ve taksit')));
+    h('div', { class: 'card-head' }, h('h2', { class: 'card-title', id: 'payT' }, 'Ödemeler'),
+      items.length ? segmented([{ id: 'liste', label: 'Yaklaşan' }, { id: 'takvim', label: 'Takvim' }], S.payView,
+        v => { S.payView = v; S.calOffset = 0; S.calSel = null; render(); }, 'small') : null));
   if (!items.length) {
     card.append(h('p', { class: 'empty-note' }, 'Aylık ödemesi girilmiş borç yok. Borç eklerken asgari ya da taksit tutarını yaz.'));
+    return card;
+  }
+  if (S.payView === 'takvim') {
+    card.append(...calendarView(d));
     return card;
   }
   card.append(
@@ -1076,9 +1202,63 @@ function payCard(d) {
   return card;
 }
 
+// One month of due days; the chosen day's payments are listed under the grid.
+function calendarView(d) {
+  const now = new Date();
+  const today = today0(now);
+  const base = new Date(now.getFullYear(), now.getMonth() + S.calOffset, 1);
+  const y = base.getFullYear(), m = base.getMonth(), dim = daysIn(y, m);
+  const byDay = new Map();
+  const undated = [];
+  for (const x of d.debts) {
+    if (!(x.minimum > 0)) continue;
+    if (!x.dueDay) { if (x.total > 0) undated.push(x); continue; }
+    const day = Math.min(x.dueDay, dim);
+    const date = new Date(y, m, day);
+    const key = isoDate(date);
+    if (!(x.total > 0) && x.paidFor !== key) continue;
+    if (!byDay.has(day)) byDay.set(day, []);
+    // Only the upcoming cycle can be ticked; other months are shown as they stand.
+    byDay.get(day).push({ x, key, due: date, days: daysBetween(today, date), paid: x.paidFor === key, fixed: key !== cycleKey(x, now) });
+  }
+  const dueDays = [...byDay.keys()].sort((a, b) => a - b);
+  let sel = S.calSel && S.calSel.y === y && S.calSel.m === m ? S.calSel.d : null;
+  if (sel == null) sel = dueDays.find(dd => new Date(y, m, dd) >= today) ?? dueDays[0] ?? null;
+  const monthTotal = sum([...byDay.values()].flat().map(i => i.x.minimum));
+  const move = step => { S.calOffset += step; S.calSel = null; render(); };
+  const head = h('div', { class: 'cal-head' },
+    h('button', { class: 'round-btn', type: 'button', 'aria-label': 'Önceki ay', onclick: () => move(-1) }, icon('chevL')),
+    h('div', { class: 'cal-title' }, `${AY[m]} ${y}`, h('small', null, monthTotal ? `${money(monthTotal)} ödeme` : 'Ödeme yok')),
+    h('button', { class: 'round-btn', type: 'button', 'aria-label': 'Sonraki ay', onclick: () => move(1) }, icon('chevR')));
+  const grid = h('div', { class: 'cal-grid' }, ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map(t => h('div', { class: 'cal-dow' }, t)));
+  const lead = (new Date(y, m, 1).getDay() + 6) % 7;
+  for (let i = 0; i < lead; i++) grid.append(h('div'));
+  for (let dd = 1; dd <= dim; dd++) {
+    const items = byDay.get(dd) || [];
+    const date = new Date(y, m, dd);
+    const cls = ['cal-day'];
+    if (date < today) cls.push('past');
+    if (items.length) cls.push(items.every(i => i.paid) ? 'has paid' : 'has');
+    if (+date === +today) cls.push('today');
+    if (dd === sel) cls.push('sel');
+    grid.append(h('button', {
+      class: cls.join(' '), type: 'button', 'aria-pressed': String(dd === sel),
+      'aria-label': `${dd} ${AY[m]}${items.length ? `, ${items.length} ödeme, ${money(sum(items.map(i => i.x.minimum)))}` : ''}`,
+      onclick: () => { S.calSel = { y, m, d: dd }; render(); },
+    }, String(dd), items.length ? h('span', { class: 'dot' }) : null));
+  }
+  const chosen = sel != null ? byDay.get(sel) || [] : [];
+  const parts = [head, grid, h('div', { class: 'cal-list' }, chosen.length
+    ? h('ul', { class: 'plist' }, chosen.map(payRow))
+    : h('p', { class: 'empty-note' }, sel != null ? `${sel} ${AY[m]}: ödeme yok.` : 'Bu ay ödeme yok.'))];
+  if (undated.length) parts.push(h('p', { class: 'hint' }, `Son ödeme günü girilmemiş: ${undated.map(x => x.bank).join(', ')}`));
+  return parts;
+}
+
 function dueChip(i) {
   if (i.paid) return chip('good', 'check', 'Ödendi');
   if (i.days == null) return chip('plain', null, 'Günü yok');
+  if (i.days < 0) return chip('plain', null, 'Geçti');
   if (i.days === 0) return chip('crit', 'alert', 'Bugün');
   if (i.days === 1) return chip('warn', 'clock', 'Yarın');
   if (i.days <= 3) return chip('warn', 'clock', `${i.days} gün`);
@@ -1090,11 +1270,13 @@ function payRow(i) {
   const sub = [k.label];
   if (i.due) sub.push(`${i.due.getDate()} ${AYK[i.due.getMonth()]}`);
   return h('li', { class: 'prow' + (i.paid ? ' paid' : '') },
-    h('button', {
-      class: 'chk', type: 'button', 'aria-pressed': String(i.paid),
-      'aria-label': `${i.x.bank} ${k.label}: ${i.paid ? 'ödenmedi yap' : 'ödendi olarak işaretle'}`,
-      onclick: () => togglePaid(i),
-    }, h('span', null, icon('check'))),
+    i.fixed
+      ? h('span', { class: 'chk fixed' + (i.paid ? ' on' : ''), 'aria-hidden': 'true' }, h('span', null, icon('check')))
+      : h('button', {
+        class: 'chk', type: 'button', 'aria-pressed': String(i.paid),
+        'aria-label': `${i.x.bank} ${k.label}: ${i.paid ? 'ödemeyi geri al' : 'ödeme gir'}`,
+        onclick: () => togglePaid(i),
+      }, h('span', null, icon('check'))),
     h('div', { class: 'pmain' }, h('div', { class: 'pname' }, i.x.bank), h('div', { class: 'psub' }, sub.join(' · '))),
     h('div', { class: 'pright' }, h('div', { class: 'pamt' }, money(i.x.minimum)), dueChip(i)));
 }
@@ -1395,12 +1577,81 @@ function debtRow(x) {
     h('span', { class: 'ramt' }, money(x.total), h('small', null, 'toplam'))));
 }
 
+/* goals tab */
+// A goal counts net savings, or only the assets picked for it. A deadline turns what is left into a monthly amount.
+function goalProgress(g, d, t) {
+  const picked = d.assets.filter(a => g.assetIds.includes(a.id));
+  const cur = Math.max(0, g.source === 'secili' ? sum(picked.map(assetValue)) : t.net);
+  const left = Math.max(0, g.target - cur);
+  let months = null, when = null;
+  if (g.deadline) {
+    const [y, m] = g.deadline.split('-').map(Number);
+    const now = new Date();
+    months = (y - now.getFullYear()) * 12 + (m - 1 - now.getMonth());
+    when = `${AYK[m - 1]} ${y}`;
+  }
+  return {
+    cur, left, months, when, picked: picked.length,
+    done: g.target > 0 && cur >= g.target,
+    pct: g.target > 0 ? Math.min(1, cur / g.target) : 0,
+    monthly: months > 0 ? left / months : null,
+  };
+}
+
+function ring(pct, done) {
+  const r = 34, c = 2 * Math.PI * r;
+  const svg = sv('svg', { viewBox: '0 0 78 78', 'aria-hidden': 'true' });
+  svg.append(sv('circle', { cx: 39, cy: 39, r, class: 'trk' }));
+  if (pct > 0) svg.append(sv('circle', { cx: 39, cy: 39, r, class: 'val', 'stroke-dasharray': `${(c * pct).toFixed(1)} ${c.toFixed(1)}` }));
+  return h('span', { class: 'ring' + (done ? ' done' : '') }, svg, h('span', null, '%' + Math.floor(pct * 100)));
+}
+
+function renderGoals(d) {
+  const wrap = h('div', { class: 'list-wrap' });
+  if (!d.goals.length) {
+    wrap.append(h('section', { class: 'card goal-empty' },
+      h('span', { class: 'ico' }, icon('target')),
+      h('h2', { class: 'card-title' }, 'İlk hedefini koy'),
+      h('p', { class: 'empty-note' }, 'Ev, araba, tatil ya da acil durum fonu… Tutarı yaz; birikiminin hedefe ne kadar yaklaştığını halkada gör.'),
+      h('button', { class: 'btn primary', type: 'button', onclick: () => openGoal(null) }, icon('plus'), 'Hedef ekle')));
+    return wrap;
+  }
+  const t = totals(d.assets, d.debts);
+  const list = d.goals.map(g => [g, goalProgress(g, d, t)]);
+  const done = list.filter(([, p]) => p.done).length;
+  wrap.append(
+    h('section', { class: 'card sum-card' },
+      h('div', null,
+        h('div', { class: 'sum-label' }, 'Net birikim'),
+        bigMoney(t.net, 'sum-big'),
+        h('div', { class: 'sum-sub' }, `${d.goals.length} hedef${done ? ` · ${done} tamamlandı` : ''}`)),
+      h('button', { class: 'btn primary', type: 'button', onclick: () => openGoal(null) }, icon('plus'), 'Hedef ekle')),
+    h('div', { class: 'goal-grid' }, list.map(([g, p]) => goalCard(g, p))));
+  return wrap;
+}
+
+function goalCard(g, p) {
+  const lines = [];
+  if (p.done) lines.push(chip('good', 'check', 'Hedefe ulaştın'));
+  else {
+    lines.push(h('span', null, `Kalan ${money(p.left)}`));
+    if (p.when) lines.push(h('span', null, p.months > 0 ? `${p.when} için ayda ${money(p.monthly)}` : p.months === 0 ? `Son ay: ${p.when}` : `Süre doldu (${p.when})`));
+  }
+  if (g.source === 'secili') lines.push(h('span', null, p.picked ? `Seçtiğin ${p.picked} varlık` : 'Seçili varlık kalmadı'));
+  return h('button', { class: 'card goal', type: 'button', onclick: () => openGoal(g) },
+    ring(p.pct, p.done),
+    h('span', { class: 'goal-main' },
+      h('span', { class: 'goal-title' }, icon(goalIcon(g.icon).icon), g.title),
+      h('span', { class: 'goal-amt' }, h('strong', null, money(p.cur)), ` / ${money(g.target)}`),
+      h('span', { class: 'goal-sub' }, lines)));
+}
+
 /* ---------- sheets & forms ---------- */
 let sheetEl = null, lastFocus = null;
-function openSheet(title, body, focusEl) {
+function openSheet(title, body, focusEl, cls) {
   closeSheet(true);
   if (!lastFocus) lastFocus = document.activeElement;
-  const sheet = h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'sheetT', tabindex: -1 },
+  const sheet = h('div', { class: 'sheet' + (cls ? ' ' + cls : ''), role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'sheetT', tabindex: -1 },
     h('div', { class: 'grab' }),
     h('div', { class: 'sheet-head' },
       h('h2', { class: 'sheet-title', id: 'sheetT' }, title),
@@ -1465,12 +1716,12 @@ function chipGroup(options, selected, onChange, label) {
   }, o.icon ? icon(o.icon) : null, o.label, o.badge ? h('span', { class: 'badge' }, o.badge) : null));
   return h('div', { class: 'opts', role: 'radiogroup', 'aria-label': label }, btns);
 }
-function segmented(options, selected, onChange) {
+function segmented(options, selected, onChange, cls) {
   const btns = options.map(o => h('button', {
     type: 'button', 'aria-pressed': String(o.id === selected),
     onclick: () => { btns.forEach((b, j) => b.setAttribute('aria-pressed', String(options[j].id === o.id))); onChange(o.id); },
   }, o.label));
-  return h('div', { class: 'seg' }, btns);
+  return h('div', { class: 'seg' + (cls ? ' ' + cls : '') }, btns);
 }
 function deleteBlock(onConfirm) {
   const box = h('div');
@@ -1574,7 +1825,10 @@ function openChooser() {
       h('span', null, h('strong', null, 'Varlık ekle'), h('span', { class: 's' }, 'Hesap, nakit, döviz, altın, yatırım…'))),
     h('button', { class: 'choice', type: 'button', onclick: () => openDebt(null) },
       h('span', { class: 'ico debt' }, icon('card')),
-      h('span', null, h('strong', null, 'Borç ekle'), h('span', { class: 's' }, 'Kredi kartı, kredi, KMH, kişi…')))));
+      h('span', null, h('strong', null, 'Borç ekle'), h('span', { class: 's' }, 'Kredi kartı, kredi, KMH, kişi…'))),
+    h('button', { class: 'choice', type: 'button', onclick: () => openGoal(null) },
+      h('span', { class: 'ico' }, icon('target')),
+      h('span', null, h('strong', null, 'Hedef ekle'), h('span', { class: 's' }, 'Ev, araba, tatil, acil durum fonu…')))));
 }
 
 function openAsset(a) {
@@ -1747,6 +2001,9 @@ function openDebt(x) {
   const fail = (msg, el) => { err.textContent = msg; if (el) el.focus(); };
   const save = h('button', { class: 'btn primary block', type: 'submit' }, isNew ? 'Kaydet' : 'Değişiklikleri kaydet');
   const form = h('form', { novalidate: true },
+    isNew ? null : h('button', { class: 'choice pay-entry', type: 'button', onclick: () => openPayment(x) },
+      h('span', { class: 'ico debt' }, icon('cash')),
+      h('span', null, h('strong', null, 'Ödeme gir'), h('span', { class: 's' }, 'Ödediğin tutarı yaz, toplamdan düşsün.'))),
     field('Banka ya da kişi', bankSuggest.wrap, 'f-bank'),
     field('Borç türü', chipGroup(DK.map(k => ({ id: k.id, label: k.label, icon: k.icon })), st.kind, v => { st.kind = v; minLabel.textContent = dkind(v).pay; }, 'Borç türü')),
     h('div', { class: 'two' },
@@ -1772,6 +2029,8 @@ function openDebt(x) {
     const item = {
       id: x ? x.id : newId(), bank: name, kind: st.kind, note: note.value.trim(), total: round2(tv), minimum: round2(mv),
       dueDay: day.value ? Number(day.value) : null, paidFor: x ? x.paidFor : null,
+      // A hand-typed new total already reflects payments, so there is nothing left to put back.
+      paidAmt: x && round2(tv) === x.total ? x.paidAmt : 0,
       createdAt: (x && x.createdAt) || now, updatedAt: now,
     };
     if (mutate(d => upsert(d.debts, item))) { closeSheet(); toast(isNew ? 'Borç eklendi' : 'Kaydedildi'); }
@@ -1779,11 +2038,292 @@ function openDebt(x) {
   openSheet(isNew ? 'Yeni borç' : 'Borcu düzenle', form, bank);
 }
 
+// Ticking asks how much was paid; un-ticking undoes it and puts the amount back on the total.
 function togglePaid(i) {
-  mutate(d => {
+  if (!i.paid) { openPayment(i.x); return; }
+  const back = i.x.paidAmt || 0;
+  const ok = mutate(d => {
     const x = d.debts.find(y => y.id === i.x.id);
-    if (x) { x.paidFor = i.paid ? null : i.key; x.updatedAt = Date.now(); }
+    if (!x) return;
+    x.total = round2(x.total + (x.paidAmt || 0));
+    x.paidFor = null;
+    x.paidAmt = 0;
+    x.updatedAt = Date.now();
   });
+  if (ok) toast(back ? `Ödeme geri alındı · ${money(back)} borca eklendi` : 'Ödeme geri alındı');
+}
+
+function openPayment(x) {
+  const k = dkind(x.kind);
+  const key = cycleKey(x, new Date());
+  const marks = x.minimum > 0;
+  const amt = moneyInput('p-amount', marks && x.total > 0 ? Math.min(x.minimum, x.total) : null);
+  const preview = h('div', { class: 'preview', 'aria-live': 'polite' });
+  const err = h('div', { class: 'err', role: 'alert' });
+  const fail = (msg, el) => { err.textContent = msg; if (el) el.focus(); };
+  const payOf = () => {
+    const raw = amt.input.value.trim();
+    const v = raw ? parseAmount(raw) : 0;
+    return Number.isFinite(v) ? Math.min(v, x.total) : NaN;
+  };
+  const upd = () => {
+    const pay = payOf();
+    preview.replaceChildren(...(pay > 0
+      ? [h('span', null, 'Kalan borç '), h('strong', null, money(x.total - pay)), h('span', null, ` · şu an ${money(x.total)}`)]
+      : [h('span', null, marks ? 'Toplam değişmez, sadece ödendi olarak işaretlenir.' : `Toplam borç ${money(x.total)}`)]));
+  };
+  amt.input.addEventListener('input', upd);
+  const set = v => { amt.input.value = NF2.format(v); err.textContent = ''; upd(); };
+  const quick = [];
+  const cap = k.short.charAt(0).toLocaleUpperCase('tr') + k.short.slice(1);
+  if (marks && x.minimum < x.total) quick.push(h('button', { class: 'opt', type: 'button', onclick: () => set(x.minimum) }, `${cap} ${money(x.minimum)}`));
+  if (x.total > 0) quick.push(h('button', { class: 'opt', type: 'button', onclick: () => set(x.total) }, `Tamamı ${money(x.total)}`));
+
+  const form = h('form', { novalidate: true },
+    h('p', { class: 'sheet-text' }, `${x.bank} · ${k.label}${x.note ? ' · ' + x.note : ''}`),
+    field('Ne kadar ödedin?', amt.wrap, 'p-amount'),
+    quick.length ? h('div', { class: 'opts quick' }, quick) : null,
+    preview,
+    err,
+    h('div', { class: 'sheet-actions' }, h('button', { class: 'btn primary block', type: 'submit' }, icon('check'), 'Ödemeyi kaydet')));
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    err.textContent = '';
+    const pay = round2(payOf());
+    if (!Number.isFinite(pay)) return fail('Tutarı rakamla yaz. Örneğin: 3.690', amt.input);
+    if (!pay && !marks) return fail('Ödediğin tutarı yaz.', amt.input);
+    const left = Math.max(0, x.total - pay);
+    const ok = mutate(d => {
+      const y = d.debts.find(z => z.id === x.id);
+      if (!y) return;
+      y.total = round2(Math.max(0, y.total - pay));
+      if (marks) {
+        y.paidAmt = round2((y.paidFor === key ? y.paidAmt || 0 : 0) + pay);
+        y.paidFor = key;
+      }
+      y.updatedAt = Date.now();
+    });
+    if (ok) { closeSheet(); toast(pay ? `${money(pay)} düşüldü · kalan ${money(left)}` : 'Ödendi olarak işaretlendi'); }
+  });
+  upd();
+  openSheet('Ödeme gir', form, amt.input);
+}
+
+function openGoal(g) {
+  const isNew = !g;
+  const st = { icon: g ? g.icon : 'ev', source: g ? g.source : 'net', ids: new Set(g ? g.assetIds : []) };
+  const title = h('input', { class: 'input', id: 'g-title', maxlength: 60, autocomplete: 'off', placeholder: goalIcon(st.icon).ph, value: g ? g.title : null });
+  const target = moneyInput('g-target', g ? g.target : null);
+  const assets = S.data.assets.slice().sort((a, b) => assetValue(b) - assetValue(a));
+
+  const srcHint = h('div', { class: 'hint' });
+  const pickBox = h('div');
+  const drawSource = () => {
+    srcHint.textContent = st.source === 'net' ? 'Tüm varlıkların eksi borçların.' : 'Sadece seçtiğin varlıklar sayılır.';
+    if (st.source !== 'secili') { pickBox.replaceChildren(); return; }
+    pickBox.replaceChildren(field('Hangi varlıklar?', assets.length
+      ? h('div', { class: 'pick-list', role: 'group', 'aria-label': 'Hedefe sayılacak varlıklar' }, assets.map(a => {
+        const b = h('button', {
+          class: 'opt', type: 'button', role: 'checkbox', 'aria-checked': String(st.ids.has(a.id)),
+          onclick: () => {
+            if (st.ids.has(a.id)) st.ids.delete(a.id); else st.ids.add(a.id);
+            b.setAttribute('aria-checked', String(st.ids.has(a.id)));
+          },
+        }, a.title, h('span', { class: 'badge' }, '₺' + compact(assetValue(a))));
+        return b;
+      }))
+      : h('p', { class: 'empty-note' }, 'Henüz varlık yok. Önce Varlıklar’dan ekle.')));
+  };
+
+  // Month and year pick the deadline together; choosing one fills in a sensible other.
+  const now = new Date();
+  const dl = g && g.deadline ? g.deadline.split('-').map(Number) : null;
+  const y0 = Math.min(now.getFullYear(), dl ? dl[0] : now.getFullYear());
+  const mSel = h('select', { class: 'input', id: 'g-month', 'aria-label': 'Ay' },
+    h('option', { value: '' }, 'Ay'),
+    AY.map((n, i) => h('option', { value: i + 1, selected: dl && dl[1] === i + 1 ? true : null }, n)));
+  const ySel = h('select', { class: 'input', 'aria-label': 'Yıl' },
+    h('option', { value: '' }, 'Yıl'),
+    Array.from({ length: now.getFullYear() + 16 - y0 }, (_, i) => y0 + i)
+      .map(y => h('option', { value: y, selected: dl && dl[0] === y ? true : null }, String(y))));
+  mSel.addEventListener('change', () => {
+    if (!mSel.value) ySel.value = '';
+    else if (!ySel.value) ySel.value = String(Number(mSel.value) - 1 >= now.getMonth() ? now.getFullYear() : now.getFullYear() + 1);
+  });
+  ySel.addEventListener('change', () => {
+    if (!ySel.value) mSel.value = '';
+    else if (!mSel.value) mSel.value = '12';
+  });
+
+  const err = h('div', { class: 'err', role: 'alert' });
+  const fail = (msg, el) => { err.textContent = msg; if (el) el.focus(); };
+  const form = h('form', { novalidate: true },
+    field('Tür', chipGroup(GOAL_ICONS.map(x => ({ id: x.id, label: x.label, icon: x.icon })), st.icon,
+      v => { st.icon = v; title.placeholder = goalIcon(v).ph; }, 'Hedef türü')),
+    field('Başlık', title, 'g-title'),
+    field('Hedef tutar', target.wrap, 'g-target'),
+    h('div', { class: 'field' }, h('div', { class: 'lbl' }, 'Neyle ölçülsün?'),
+      segmented([{ id: 'net', label: 'Net birikimim' }, { id: 'secili', label: 'Seçtiğim varlıklar' }], st.source,
+        v => { st.source = v; err.textContent = ''; drawSource(); }, 'wide'),
+      srcHint),
+    pickBox,
+    field('Ne zamana kadar?', h('div', { class: 'pair' },
+      h('div', { class: 'sel' }, mSel, icon('chev')),
+      h('div', { class: 'sel' }, ySel, icon('chev'))), 'g-month', 'İsteğe bağlı. Seçersen her ay ne kadar ayırman gerektiğini gösterir.'),
+    err,
+    h('div', { class: 'sheet-actions' },
+      h('button', { class: 'btn primary block', type: 'submit' }, isNew ? 'Kaydet' : 'Değişiklikleri kaydet'),
+      isNew ? null : deleteBlock(() => {
+        if (mutate(d => { d.goals = d.goals.filter(x => x.id !== g.id); })) { closeSheet(); toast('Hedef silindi'); }
+      })));
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    err.textContent = '';
+    const tv = parseAmount(target.input.value);
+    if (!Number.isFinite(tv) || tv <= 0) return fail('Hedef tutarı rakamla yaz. Örneğin: 500.000', target.input);
+    const ids = assets.filter(a => st.ids.has(a.id)).map(a => a.id);
+    if (st.source === 'secili' && !ids.length) return fail('En az bir varlık seç ya da “Net birikimim”e dön.');
+    const at = Date.now();
+    const item = {
+      id: g ? g.id : newId(), title: title.value.trim() || goalIcon(st.icon).title, icon: st.icon,
+      target: round2(tv), source: st.source, assetIds: st.source === 'secili' ? ids : [],
+      deadline: mSel.value && ySel.value ? `${ySel.value}-${pad(Number(mSel.value))}` : null,
+      createdAt: (g && g.createdAt) || at, updatedAt: at,
+    };
+    // A new goal is shown right away on its own tab.
+    if (isNew) S.tab = 'hedef';
+    if (mutate(d => upsert(d.goals, item))) { closeSheet(); toast(isNew ? 'Hedef eklendi' : 'Kaydedildi'); }
+  });
+  drawSource();
+  openSheet(isNew ? 'Yeni hedef' : 'Hedefi düzenle', form, title);
+}
+
+/* ---------- bulk update: every hand-entered number on one screen ---------- */
+// Fields start empty with today's value in grey; only what is typed changes.
+function openBulk() {
+  const d = S.data;
+  if (!d.assets.length && !d.debts.length) { openChooser(); return; }
+  const t0 = totals(d.assets, d.debts);
+  const rows = [];
+  const netVal = h('strong', null, money(t0.net));
+  const netDiff = h('em');
+  const err = h('div', { class: 'err', role: 'alert' });
+
+  const signed = v => (v > 0 ? '+' : '−') + money(Math.abs(v));
+  function addInput(ref, old, label, unit, worth, apply) {
+    const isQty = unit != null;
+    const fmt = isQty ? NF4 : NF2;
+    const input = h('input', { class: 'input', inputmode: 'decimal', autocomplete: 'off', 'aria-label': label, placeholder: fmt.format(old) });
+    blurFormat(input, v => fmt.format(v));
+    const diff = h('span', { class: 'bulk-diff', hidden: true });
+    const r = { ref, input, old, diff, worth, apply };
+    rows.push(r);
+    input.addEventListener('input', update);
+    return {
+      wrap: isQty
+        ? h('div', { class: 'qty' }, input, h('span', { class: 'suffix', 'aria-hidden': 'true' }, unit))
+        : h('div', { class: 'money' }, h('span', { 'aria-hidden': 'true' }, '₺'), input),
+      diff,
+    };
+  }
+  function read(r) {
+    const raw = r.input.value.trim();
+    if (!raw) return {};
+    const v = parseAmount(raw);
+    if (!Number.isFinite(v)) return { bad: true };
+    return Math.abs(v - r.old) < 0.005 ? {} : { v };
+  }
+  function update() {
+    let change = 0;
+    for (const r of rows) {
+      const res = read(r);
+      r.input.classList.toggle('bad', !!res.bad);
+      const w = res.v != null ? r.worth(res.v) : 0;
+      change += w;
+      r.diff.hidden = Math.round(w) === 0;
+      r.diff.className = 'bulk-diff ' + (w > 0 ? 'up' : 'down');
+      r.diff.textContent = Math.round(w) !== 0 ? signed(w) : '';
+    }
+    netVal.textContent = money(t0.net + change);
+    netDiff.className = change > 0 ? 'up' : 'down';
+    netDiff.textContent = Math.round(change) !== 0 ? signed(change) : '';
+  }
+
+  const nameCell = (ic, debt, name, sub) => h('div', { class: 'bulk-name' },
+    h('span', { class: 'mini-ico' + (debt ? ' debt' : '') }, icon(ic)),
+    h('span', { class: 'bulk-t' }, h('strong', null, name), sub ? h('small', null, sub) : null));
+
+  const parts = [h('p', { class: 'bulk-intro' }, 'Gri rakamlar şu anki değer. Sadece değişenlere yeni rakamı yaz.')];
+  if (d.assets.length) {
+    parts.push(h('h3', { class: 'bulk-h' }, 'Varlıklar'));
+    for (const a of d.assets.slice().sort((x, y) => assetValue(y) - assetValue(x))) {
+      const k = akind(a.kind);
+      const ref = 'a:' + a.id;
+      let cell;
+      if (a.unit === 'TRY') {
+        const sub = k.mode === 'inv' ? invOf(a.sub).label : k.label;
+        cell = addInput(ref, a.qty, `${a.title}, yeni tutar`, null, v => v - a.qty, (x, v) => { x.qty = round4(v); });
+        parts.push(h('div', { class: 'bulk-row' }, nameCell(k.icon, false, a.title, sub === a.title ? null : sub), cell.wrap, cell.diff));
+      } else if (a.unit === 'MANUAL') {
+        const p0 = a.price || 0;
+        cell = addInput(ref, p0, `${a.title}, yeni birim fiyat`, null, v => a.qty * (v - p0), (x, v) => { x.price = round2(v); });
+        parts.push(h('div', { class: 'bulk-row' }, nameCell(k.icon, false, a.title, `${fmtQty(a.qty)} adet × birim fiyat`), cell.wrap, cell.diff));
+      } else {
+        const f = fxOf(a.unit), gd = goldOf(a.unit);
+        const p = priceOf(a.unit);
+        cell = addInput(ref, a.qty, `${a.title}, yeni miktar`, f ? f.sym : gd.unit, v => (p != null ? (v - a.qty) * p : 0), (x, v) => { x.qty = round4(v); });
+        parts.push(h('div', { class: 'bulk-row' }, nameCell(k.icon, false, a.title, `≈ ${money(assetValue(a))}`), cell.wrap, cell.diff));
+      }
+    }
+  }
+  if (d.debts.length) {
+    parts.push(h('h3', { class: 'bulk-h' }, 'Borçlar'));
+    for (const x of d.debts.slice().sort((p, q) => q.total - p.total)) {
+      const k = dkind(x.kind);
+      const ref = 'd:' + x.id;
+      const tot = addInput(ref, x.total, `${x.bank} ${k.label}, yeni toplam borç`, null, v => -(v - x.total), (y, v) => { y.total = round2(v); y.paidAmt = 0; });
+      const min = addInput(ref, x.minimum, `${x.bank} ${k.label}, yeni ${k.short}`, null, () => 0, (y, v) => { y.minimum = round2(v); });
+      parts.push(h('div', { class: 'bulk-row' },
+        nameCell(k.icon, true, x.bank, k.label + (x.note ? ' · ' + x.note : '')),
+        h('div', { class: 'bulk-two' },
+          h('div', null, h('span', { class: 'cap' }, 'Toplam'), tot.wrap, tot.diff),
+          h('div', null, h('span', { class: 'cap' }, k.pay), min.wrap))));
+    }
+  }
+
+  const form = h('form', { novalidate: true }, parts, err,
+    h('div', { class: 'bulk-foot' },
+      h('div', { class: 'bulk-net' }, 'Net birikim', h('div', null, netVal, netDiff)),
+      h('button', { class: 'btn primary', type: 'submit' }, icon('check'), 'Kaydet')));
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    err.textContent = '';
+    const changes = new Map();
+    let firstBad = null;
+    for (const r of rows) {
+      const res = read(r);
+      if (res.bad) { firstBad = firstBad || r.input; continue; }
+      if (res.v == null) continue;
+      if (!changes.has(r.ref)) changes.set(r.ref, []);
+      changes.get(r.ref).push([r, res.v]);
+    }
+    if (firstBad) { err.textContent = 'Kırmızı kutudaki rakamı düzelt. Örneğin: 12.500'; firstBad.focus(); return; }
+    if (!changes.size) { closeSheet(); toast('Değişiklik yok'); return; }
+    const at = Date.now();
+    const ok = mutate(next => {
+      for (const [prefix, list] of [['a:', next.assets], ['d:', next.debts]]) {
+        for (const item of list) {
+          const ch = changes.get(prefix + item.id);
+          if (!ch) continue;
+          for (const [r, v] of ch) r.apply(item, v);
+          if (prefix === 'a:') item.savedValue = Math.round(assetValue(item)) || item.savedValue;
+          item.updatedAt = at;
+        }
+      }
+    });
+    if (ok) { closeSheet(); toast(`${changes.size} kayıt güncellendi`); }
+  });
+  openSheet('Rakamları güncelle', form, null, 'has-foot');
 }
 
 /* ---------- settings, backup, restore ---------- */
@@ -1809,7 +2349,7 @@ function openSettings() {
 
 function backup() {
   const d = S.data;
-  const payload = { app: 'bilancom', v: 1, exportedAt: new Date().toISOString(), data: { assets: d.assets, debts: d.debts, history: d.history } };
+  const payload = { app: 'bilancom', v: 1, exportedAt: new Date().toISOString(), data: { assets: d.assets, debts: d.debts, goals: d.goals, history: d.history } };
   const name = `bilancom-yedek-${isoDate(new Date())}.json`;
   const text = JSON.stringify(payload, null, 2);
   const done = msg => {
@@ -1849,7 +2389,7 @@ function restorePick() {
     const when = o.exportedAt ? new Date(o.exportedAt) : null;
     const whenText = when && !isNaN(when) ? `${when.getDate()} ${AY[when.getMonth()]} ${when.getFullYear()} tarihli yedek.` : 'Tarihi bilinmeyen yedek.';
     openSheet('Yedek geri yüklensin mi?', h('div', null,
-      h('p', { class: 'sheet-text' }, `${whenText} ${d.assets.length} varlık, ${d.debts.length} borç. Bu telefondaki mevcut kayıtların yerine geçer.`),
+      h('p', { class: 'sheet-text' }, `${whenText} ${d.assets.length} varlık, ${d.debts.length} borç${d.goals.length ? `, ${d.goals.length} hedef` : ''}. Bu telefondaki mevcut kayıtların yerine geçer.`),
       h('div', { class: 'sheet-actions' },
         h('button', { class: 'btn primary block', type: 'button', onclick: () => {
           const next = { ...d, lastBackup: S.data.lastBackup, firstDataAt: d.firstDataAt || Date.now() };
@@ -1862,7 +2402,7 @@ function restorePick() {
 
 function confirmWipe() {
   openSheet('Tüm veriler silinsin mi?', h('div', null,
-    h('p', { class: 'sheet-text' }, 'Bu telefondaki bütün varlık, borç ve geçmiş kayıtları silinir. Yedeğin yoksa geri getirilemez.'),
+    h('p', { class: 'sheet-text' }, 'Bu telefondaki bütün varlık, borç, hedef ve geçmiş kayıtları silinir. Yedeğin yoksa geri getirilemez.'),
     h('div', { class: 'sheet-actions' },
       h('button', { class: 'btn danger block', type: 'button', onclick: () => {
         const next = emptyData();
@@ -1926,9 +2466,9 @@ function wire() {
   const addForTab = () => {
     if (S.tab === 'varlik') openAsset(null);
     else if (S.tab === 'borc') openDebt(null);
+    else if (S.tab === 'hedef') openGoal(null);
     else openChooser();
   };
-  $('#navAdd').addEventListener('click', addForTab);
   $('#hideBtn').addEventListener('click', () => {
     S.hide = !S.hide;
     try { localStorage.setItem('hd.hide', S.hide ? '1' : '0'); } catch (e) { /* ignore */ }
