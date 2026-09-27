@@ -327,6 +327,7 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .sg.on, .sg:hover { background: var(--accent-soft); }
 .ramt { text-align: right; font-size: 17px; font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ramt small { display: block; font-size: 13.5px; font-weight: 500; color: var(--ink-3); }
+.list-tools { display: flex; justify-content: flex-end; padding: 10px 0 0; }
 .group { padding-top: 12px; }
 .group + .group { border-top: 1px solid var(--line); margin-top: 4px; }
 .group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 4px 0 2px; }
@@ -514,6 +515,18 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .steps li { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 18px; background: var(--surface); box-shadow: var(--shadow); font-size: 16px; }
 .steps b { font-weight: 700; }
 .step-ico { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 13px; background: var(--ico-bg); color: var(--accent-text); }
+
+/* iPhone home-screen app (iOS 26+): while a page can't scroll, the layout viewport ends one status-bar
+   height short of the screen, so bars pinned with bottom: 0 float. 100lvh is the full screen, so pin
+   bottom bars and the sheet backdrop from the top edge instead. */
+@media (display-mode: standalone) {
+  .scrim { bottom: auto; height: 100vh; height: 100lvh; }
+}
+@media (display-mode: standalone) and (max-width: 759px) {
+  .tabs { top: 100vh; top: 100lvh; bottom: auto; transform: translateY(-100%); }
+  .toast { top: calc(100lvh - 96px - env(safe-area-inset-bottom, 0px)); bottom: auto; transform: translate(-50%, calc(8px - 100%)); }
+  .toast.show { transform: translate(-50%, -100%); }
+}
 
 .loading { padding: 64px 0; text-align: center; font-size: 16px; color: var(--ink-3); }
 @media (prefers-reduced-motion: reduce) {
@@ -722,7 +735,7 @@ const fxOf = code => FX.find(f => f.code === code) || null;
 const goldOf = code => GOLD.find(g => g.code === code) || null;
 const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
 
-const APP_VERSION = '2026.09.27-1708';
+const APP_VERSION = '2026.09.27-1822';
 const KEY = 'hd.defter.v1';
 const PKEY = 'hd.fiyat.v1';
 const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
@@ -737,6 +750,7 @@ const S = {
   hide: false,
   showTable: false,
   payView: 'liste',
+  debtView: 'tur',
   calOffset: 0,
   calSel: null,
   inSafari: false,
@@ -992,6 +1006,9 @@ function totals(assets, debts) {
   const d = sum(debts.map(x => x.total));
   return { assets: a, debts: d, net: a - d, monthly: sum(debts.map(x => (x.total > 0 ? x.minimum || 0 : 0))) };
 }
+// Lists follow the kind order of AK and DK (Banka, Nakit, Döviz, … / Kredi kartı, Kredi, …), largest first within a kind.
+const byAssetKind = (a, b) => AK.findIndex(k => k.id === a.kind) - AK.findIndex(k => k.id === b.kind) || assetValue(b) - assetValue(a);
+const byDebtKind = (a, b) => DK.findIndex(k => k.id === a.kind) - DK.findIndex(k => k.id === b.kind) || b.total - a.total;
 function recordHistory(d) {
   if (!d.assets.length && !d.debts.length && !Object.keys(d.history).length) return false;
   const t = totals(d.assets, d.debts);
@@ -1511,9 +1528,19 @@ function assetSub(a) {
   if (mode === 'inv') {
     const extra = a.codeName ? ` · ${a.codeName}` : a.code && a.code !== a.title ? ` · ${a.code}` : '';
     const s = invOf(a.sub).label + extra;
-    return a.unit === 'MANUAL' ? `${s} · ${fmtQty(a.qty)} adet × ${money2(a.price)}` : s;
+    if (a.unit === 'MANUAL') return `${s} · ${fmtQty(a.qty)} adet × ${money2(a.price)}`;
+    return s === a.title ? '' : s;
   }
-  return akind(a.kind).label;
+  // Plain TL items need no sub-line: the group heading already names the kind.
+  return '';
+}
+
+function assetRow(a) {
+  const sub = assetSub(a);
+  return h('li', null, h('button', { class: 'row', type: 'button', onclick: () => openAsset(a) },
+    h('span', { class: 'ico' }, icon(akind(a.kind).icon)),
+    h('span', { class: 'rmain' }, h('span', { class: 'rtitle' }, a.title), sub ? h('span', { class: 'rsub' }, sub) : null),
+    h('span', { class: 'ramt' }, money(assetValue(a)))));
 }
 
 function renderAssets(d) {
@@ -1529,14 +1556,11 @@ function renderAssets(d) {
     wrap.append(h('section', { class: 'card' }, h('p', { class: 'empty-note' }, 'Henüz varlık yok. Banka hesabı, nakit, altın, döviz, yatırım… ne varsa başlığıyla ekle.')));
     return wrap;
   }
-  const list = d.assets.slice().sort((a, b) => assetValue(b) - assetValue(a));
-  wrap.append(h('section', { class: 'card rows-card' }, h('ul', { class: 'rows' }, list.map(a => {
-    const k = akind(a.kind);
-    return h('li', null, h('button', { class: 'row', type: 'button', onclick: () => openAsset(a) },
-      h('span', { class: 'ico' }, icon(k.icon)),
-      h('span', { class: 'rmain' }, h('span', { class: 'rtitle' }, a.title), h('span', { class: 'rsub' }, assetSub(a))),
-      h('span', { class: 'ramt' }, money(assetValue(a)))));
-  }))));
+  // Grouped by kind in a fixed order (Banka, Nakit, Döviz, …), largest first inside each group.
+  const groups = AK.map(k => ({ k, items: d.assets.filter(a => a.kind === k.id).sort(byAssetKind) })).filter(g => g.items.length);
+  wrap.append(h('section', { class: 'card rows-card' }, groups.map(g => h('div', { class: 'group' },
+    h('div', { class: 'group-head' }, h('span', { class: 'group-name' }, g.k.label), h('span', { class: 'group-total' }, money(sum(g.items.map(assetValue))))),
+    h('ul', { class: 'rows' }, g.items.map(assetRow))))));
   return wrap;
 }
 
@@ -1554,30 +1578,44 @@ function renderDebts(d) {
     wrap.append(h('section', { class: 'card' }, h('p', { class: 'empty-note' }, 'Henüz borç yok. Kredi kartı, kredi ya da KMH borçlarını banka banka ekle.')));
     return wrap;
   }
-  const groups = new Map();
-  for (const x of d.debts) {
-    const key = x.bank.toLocaleLowerCase('tr');
-    if (!groups.has(key)) groups.set(key, { name: x.bank, items: [] });
-    groups.get(key).items.push(x);
+  // By kind (Kredi kartı, Kredi, …) or by bank in alphabetical order; the choice stays on this phone.
+  const byBank = S.debtView === 'banka';
+  let groups;
+  if (byBank) {
+    const m = new Map();
+    for (const x of d.debts) {
+      const key = x.bank.toLocaleLowerCase('tr');
+      if (!m.has(key)) m.set(key, { name: x.bank, items: [] });
+      m.get(key).items.push(x);
+    }
+    groups = [...m.values()].sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+    groups.forEach(g => g.items.sort(byDebtKind));
+  } else {
+    groups = DK.map(k => ({ name: k.label, items: d.debts.filter(x => x.kind === k.id).sort(byDebtKind) })).filter(g => g.items.length);
   }
-  const list = [...groups.values()]
-    .map(g => ({ ...g, total: sum(g.items.map(i => i.total)) }))
-    .sort((a, b) => b.total - a.total);
-  wrap.append(h('section', { class: 'card rows-card' }, list.map(g => h('div', { class: 'group' },
-    h('div', { class: 'group-head' }, h('span', { class: 'group-name' }, g.name), h('span', { class: 'group-total' }, money(g.total))),
-    h('ul', { class: 'rows' }, g.items.slice().sort((a, b) => b.total - a.total).map(debtRow))))));
+  wrap.append(h('section', { class: 'card rows-card' },
+    h('div', { class: 'list-tools' }, segmented([{ id: 'tur', label: 'Türe göre' }, { id: 'banka', label: 'Bankaya göre' }], byBank ? 'banka' : 'tur', v => {
+      S.debtView = v;
+      try { localStorage.setItem('hd.borcSira', v); } catch (e) { /* this visit only */ }
+      render();
+    }, 'small')),
+    groups.map(g => h('div', { class: 'group' },
+      h('div', { class: 'group-head' }, h('span', { class: 'group-name' }, g.name), h('span', { class: 'group-total' }, money(sum(g.items.map(i => i.total))))),
+      h('ul', { class: 'rows' }, g.items.map(x => debtRow(x, byBank)))))));
   return wrap;
 }
 
-function debtRow(x) {
+// Under a kind heading the row names the bank; under a bank heading it names the kind.
+function debtRow(x, byBank) {
   const k = dkind(x.kind);
   const sub = [];
+  if (!byBank && x.note) sub.push(x.note);
   if (x.minimum > 0) sub.push(`${k.short} ${money(x.minimum)}`);
   if (x.dueDay) sub.push(`her ayın ${ordinal(x.dueDay)}`);
   return h('li', null, h('button', { class: 'row', type: 'button', onclick: () => openDebt(x) },
     h('span', { class: 'ico debt' }, icon(k.icon)),
     h('span', { class: 'rmain' },
-      h('span', { class: 'rtitle' }, k.label + (x.note ? ' · ' + x.note : '')),
+      h('span', { class: 'rtitle' }, byBank ? k.label + (x.note ? ' · ' + x.note : '') : x.bank),
       sub.length ? h('span', { class: 'rsub' }, sub.join(' · ')) : null),
     h('span', { class: 'ramt' }, money(x.total), h('small', null, 'toplam'))));
 }
@@ -2288,7 +2326,7 @@ function openBulk() {
   const parts = [h('p', { class: 'bulk-intro' }, 'Gri rakamlar şu anki değer. Sadece değişenlere yeni rakamı yaz.')];
   if (d.assets.length) {
     parts.push(h('h3', { class: 'bulk-h' }, 'Varlıklar'));
-    for (const a of d.assets.slice().sort((x, y) => assetValue(y) - assetValue(x))) {
+    for (const a of d.assets.slice().sort(byAssetKind)) {
       const k = akind(a.kind);
       const ref = 'a:' + a.id;
       let cell;
@@ -2310,7 +2348,7 @@ function openBulk() {
   }
   if (d.debts.length) {
     parts.push(h('h3', { class: 'bulk-h' }, 'Borçlar'));
-    for (const x of d.debts.slice().sort((p, q) => q.total - p.total)) {
+    for (const x of d.debts.slice().sort(byDebtKind)) {
       const k = dkind(x.kind);
       const ref = 'd:' + x.id;
       const tot = addInput(ref, x.total, `${x.bank} ${k.label}, yeni toplam borç`, null, v => -(v - x.total), (y, v) => { y.total = round2(v); y.paidAmt = 0; });
@@ -2520,7 +2558,10 @@ function wire() {
 }
 
 function boot() {
-  try { S.hide = localStorage.getItem('hd.hide') === '1'; } catch (e) { /* ignore */ }
+  try {
+    S.hide = localStorage.getItem('hd.hide') === '1';
+    S.debtView = localStorage.getItem('hd.borcSira') === 'banka' ? 'banka' : 'tur';
+  } catch (e) { /* ignore */ }
   S.data = loadData();
   applyTheme();
   try {
