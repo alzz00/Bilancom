@@ -40,7 +40,8 @@ Bulut oturumu `main`'e gönderemezse PR aç; kullanıcı telefondan **Merge**'e 
   tek ekranda) ve **+**. Ödemeler kartında Yaklaşan | Takvim.
 - Borçta **Ödeme gir**: tutar toplamdan düşer (`paidAmt`), "Hangi hesaptan" (`paidFrom`) seçilen hesaptan düşer; tik geri
   alınınca iade edilir. Kart/KMH için "Her ay ne ödüyorsun: Asgari | Tamamını" (`payFull`).
-- Maaş (`income`: tutar, gün, hesap) maaş gününde hesaba eklenir; banner'da Geri al.
+- Maaş (`income`: tutar, gün, hesap) maaş gününde hesaba eklenir; banner'da Geri al. Hesap listesi yalnızca Varlıklar'daki
+  TL banka/nakit hesapları; eksik hesap maaş ekranından "Listede olmayan hesabı ekle" ile eklenir, sonra maaşa geri dönülür.
 - Ayarlar'da "Net | Toplam birikim" (`hd.birikim`).
 - Hedefte "Net birikimim" seçiliyken **Hariç tut** (`excludeIds`); "Seçtiğim varlıklar" (`assetIds`) sadece seçilenleri sayar.
 - Listeler türe göre sıralı (giriş sırasına göre değil). Borçlarda "Bankaya göre" düğmesi (`hd.borcSira`).

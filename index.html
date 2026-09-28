@@ -340,6 +340,8 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .salary-r strong.neg { color: var(--crit); }
 .salary.add { font-weight: 650; }
 .salary.add > svg.i { width: 18px; height: 18px; color: var(--accent-text); }
+.add-acc { justify-self: start; display: inline-flex; align-items: center; gap: 6px; color: var(--accent-text); }
+.add-acc svg.i { width: 16px; height: 16px; stroke-width: 2.2; }
 .group { padding-top: 12px; }
 .group + .group { border-top: 1px solid var(--line); margin-top: 4px; }
 .group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 4px 0 2px; }
@@ -786,7 +788,7 @@ const fxOf = code => FX.find(f => f.code === code) || null;
 const goldOf = code => GOLD.find(g => g.code === code) || null;
 const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
 
-const APP_VERSION = '2026.09.28-0115';
+const APP_VERSION = '2026.09.28-0616';
 const KEY = 'hd.defter.v1';
 const PKEY = 'hd.fiyat.v1';
 const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
@@ -2004,7 +2006,8 @@ function openChooser() {
       h('span', null, h('strong', null, 'Hedef ekle'), h('span', { class: 's' }, 'Ev, araba, tatil, acil durum fonu…')))));
 }
 
-function openAsset(a) {
+// opts.after(item) runs once a new record is saved (used to return to the salary sheet).
+function openAsset(a, opts) {
   const isNew = !a;
   const mode0 = a ? akind(a.kind).mode : 'tl';
   const st = {
@@ -2173,7 +2176,11 @@ function openAsset(a) {
       createdAt: (a && a.createdAt) || now, updatedAt: now,
     };
     item.savedValue = Math.round(assetValue(item)) || (a && a.unit === unit ? a.savedValue : 0);
-    if (mutate(d => upsert(d.assets, item))) { closeSheet(); toast(isNew ? 'Varlık eklendi' : 'Kaydedildi'); }
+    if (mutate(d => upsert(d.assets, item))) {
+      closeSheet();
+      toast(isNew ? 'Varlık eklendi' : 'Kaydedildi');
+      if (opts && opts.after) opts.after(item);
+    }
   });
   layout();
   openSheet(isNew ? 'Yeni varlık' : 'Varlığı düzenle', form, title);
@@ -2334,22 +2341,34 @@ function openPayment(x) {
 }
 
 /* ---------- salary ---------- */
-function openSalary() {
+// back: what was typed before stepping out to add a missing account, so nothing is lost on the way back.
+function openSalary(back) {
   const inc = S.data.income;
+  const p = back && back.fromAdd ? back : null;
   const accounts = tlAccounts();
-  const st = { acc: inc ? inc.accountId || '' : accounts.length ? accounts[0].id : '' };
-  const amount = moneyInput('s-amount', inc ? inc.amount : null);
+  const st = { acc: p ? p.acc : inc ? inc.accountId || '' : accounts.length ? accounts[0].id : '' };
+  const amount = moneyInput('s-amount', p ? p.amount : inc ? inc.amount : null);
+  const day0 = p ? p.day : inc ? inc.day : 1;
   const day = h('select', { class: 'input', id: 's-day' },
-    Array.from({ length: 31 }, (_, i) => h('option', { value: i + 1, selected: (inc ? inc.day : 1) === i + 1 ? true : null }, `Ayın ${ordinal(i + 1)}`)));
+    Array.from({ length: 31 }, (_, i) => h('option', { value: i + 1, selected: day0 === i + 1 ? true : null }, `Ayın ${ordinal(i + 1)}`)));
   const err = h('div', { class: 'err', role: 'alert' });
+  // Only lira bank and cash accounts from Varlıklar can take the salary; a missing one can be added from here.
+  const addAccount = h('button', { class: 'link-btn add-acc', type: 'button', onclick: () => {
+    const typed = parseAmount(amount.input.value);
+    const keep = { fromAdd: true, amount: typed > 0 ? typed : null, day: Number(day.value), acc: st.acc };
+    openAsset(null, { after: item => openSalary({ ...keep, acc: item.unit === 'TRY' && (item.kind === 'banka' || item.kind === 'nakit') ? item.id : keep.acc }) });
+  } }, icon('plus'), 'Listede olmayan hesabı ekle');
   const form = h('form', { novalidate: true },
     field('Aylık maaşın (net)', amount.wrap, 's-amount'),
     field('Maaş günü', h('div', { class: 'sel' }, day, icon('chev')), 's-day'),
-    accounts.length
-      ? field('Hangi hesaba yatıyor?', chipGroup([...accounts.map(a => ({ id: a.id, label: a.title })), { id: '', label: 'Hesaba ekleme' }], st.acc,
-          v => { st.acc = v; }, 'Maaşın yattığı hesap'), null,
-        'Maaş gününde bu hesaba kendiliğinden eklenir. Harcamaların kaydedilmediği için ay sonunda Güncelle ile hesabın gerçek bakiyesini yaz.')
-      : h('p', { class: 'hint' }, 'Maaşın hesaba kendiliğinden eklensin istersen önce Varlıklar’a TL banka hesabını ekle.'),
+    h('div', { class: 'field' },
+      h('div', { class: 'lbl' }, 'Hangi hesaba yatıyor?'),
+      accounts.length ? chipGroup([...accounts.map(a => ({ id: a.id, label: a.title })), { id: '', label: 'Hesaba ekleme' }], st.acc,
+        v => { st.acc = v; }, 'Maaşın yattığı hesap') : null,
+      addAccount,
+      h('div', { class: 'hint' }, accounts.length
+        ? 'Listede Varlıklar’a eklediğin TL banka ve nakit hesapları var. Maaş gününde seçtiğin hesaba kendiliğinden eklenir; ay sonunda Güncelle ile gerçek bakiyeyi yaz.'
+        : 'Maaşının yattığı TL hesap henüz Varlıklar’da yok; yukarıdan ekleyebilirsin.')),
     err,
     h('div', { class: 'sheet-actions' },
       h('button', { class: 'btn primary block', type: 'submit' }, 'Kaydet'),
