@@ -1,6 +1,6 @@
 // Uygulamayı telefonda saklar: internet yokken de açılır.
 // Her yayında VERSION değişmeli (node araclar/surum-artir.js); telefon yeni sürümü indirip "Yeni sürüm hazır" der.
-const VERSION = '2026.09.28-0616';
+const VERSION = '2026.09.28-0734';
 const CACHE = 'bilancom-' + VERSION;
 const SHELL = ['./', './index.html', './manifest.webmanifest', './ikonlar/ikon-180.png', './ikonlar/ikon-192.png', './ikonlar/ikon-512.png',
   './listeler/hisseler.json', './listeler/fonlar.json'];

@@ -340,8 +340,8 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 .salary-r strong.neg { color: var(--crit); }
 .salary.add { font-weight: 650; }
 .salary.add > svg.i { width: 18px; height: 18px; color: var(--accent-text); }
-.add-acc { justify-self: start; display: inline-flex; align-items: center; gap: 6px; color: var(--accent-text); }
-.add-acc svg.i { width: 16px; height: 16px; stroke-width: 2.2; }
+.pay-big.neg { color: var(--crit); }
+.payoff-f { margin: 8px 0 0; }
 .group { padding-top: 12px; }
 .group + .group { border-top: 1px solid var(--line); margin-top: 4px; }
 .group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 4px 0 2px; }
@@ -788,7 +788,7 @@ const fxOf = code => FX.find(f => f.code === code) || null;
 const goldOf = code => GOLD.find(g => g.code === code) || null;
 const invOf = id => INV.find(x => x.id === id) || INV[INV.length - 1];
 
-const APP_VERSION = '2026.09.28-0616';
+const APP_VERSION = '2026.09.28-0734';
 const KEY = 'hd.defter.v1';
 const PKEY = 'hd.fiyat.v1';
 const PRICE_URL = 'https://finans.truncgil.com/v4/today.json';
@@ -970,13 +970,14 @@ function cleanDebt(o) {
     createdAt: num(o.createdAt), updatedAt: num(o.updatedAt),
   };
 }
-// The salary: added once a month on its day to the chosen TL account.
+// The salary: added once a month on its day to its own "Maaş" line (accountId). Version 1 pointed at a bank the
+// user picked; that choice is dropped so the salary gets its own line from the next pay day.
 function cleanIncome(o) {
   if (!o || typeof o !== 'object' || !(num(o.amount) > 0)) return null;
   const day = Math.round(num(o.day));
   return {
-    amount: num(o.amount), day: day >= 1 && day <= 31 ? day : 1,
-    accountId: typeof o.accountId === 'string' && ID_RE.test(o.accountId) ? o.accountId : null,
+    v: 2, amount: num(o.amount), day: day >= 1 && day <= 31 ? day : 1,
+    accountId: o.v === 2 && typeof o.accountId === 'string' && ID_RE.test(o.accountId) ? o.accountId : null,
     lastAdded: typeof o.lastAdded === 'string' && /^\d{4}-\d{2}$/.test(o.lastAdded) ? o.lastAdded : null,
     addedAt: num(o.addedAt), undone: o.undone === true,
   };
@@ -1005,7 +1006,12 @@ function cleanGoal(o) {
     createdAt: num(o.createdAt), updatedAt: num(o.updatedAt),
   };
 }
-const emptyData = () => ({ v: 1, assets: [], debts: [], goals: [], income: null, history: {}, lastBackup: 0, firstDataAt: 0 });
+// Which money the "Borçlar kapanınca" card counts: the monthly salary and/or chosen assets.
+function cleanPayoff(o) {
+  if (!o || typeof o !== 'object') return null;
+  return { salary: o.salary === true, ids: Array.isArray(o.ids) ? o.ids.filter(x => typeof x === 'string').slice(0, 60) : [] };
+}
+const emptyData = () => ({ v: 1, assets: [], debts: [], goals: [], income: null, payoff: null, history: {}, lastBackup: 0, firstDataAt: 0 });
 function sanitizeData(o) {
   const d = emptyData();
   if (!o || typeof o !== 'object') return d;
@@ -1013,6 +1019,7 @@ function sanitizeData(o) {
   d.debts = (Array.isArray(o.debts) ? o.debts : []).map(cleanDebt).filter(Boolean);
   d.goals = (Array.isArray(o.goals) ? o.goals : []).map(cleanGoal).filter(Boolean);
   d.income = cleanIncome(o.income);
+  d.payoff = cleanPayoff(o.payoff);
   if (o.history && typeof o.history === 'object') {
     for (const [k, v] of Object.entries(o.history)) {
       const c = cleanHist(v);
@@ -1236,7 +1243,60 @@ function renderSummary(d) {
   // Nothing entered yet: a clean start with the two ways in, plus today's prices.
   if (!d.assets.length && !d.debts.length) return h('div', { class: 'dash' }, welcomeCard(), marketCard(d));
   const t = totals(d.assets, d.debts);
-  return h('div', { class: 'dash' }, heroCard(d, t), payCard(d), distCard(d), marketCard(d), trendCard(d, t));
+  return h('div', { class: 'dash' }, heroCard(d, t), payCard(d), payoffCard(d, t), distCard(d), marketCard(d), trendCard(d, t));
+}
+
+// What the chosen money leaves once every debt is paid off. Nothing chosen yet: the salary, if there is one.
+function payoffChoice() {
+  const p = S.data.payoff || { salary: !!S.data.income, ids: [] };
+  return { salary: p.salary && !!S.data.income, ids: p.ids.filter(id => S.data.assets.some(a => a.id === id)) };
+}
+function payoffCard(d, t) {
+  if (!(t.debts > 0)) return null;
+  const ch = payoffChoice();
+  const picked = d.assets.filter(a => ch.ids.includes(a.id));
+  const salary = ch.salary ? S.data.income.amount : 0;
+  const money0 = salary + sum(picked.map(assetValue));
+  const card = h('section', { class: 'card', 'aria-labelledby': 'poT' },
+    h('div', { class: 'card-head' },
+      h('h2', { class: 'card-title', id: 'poT' }, 'Borçlar kapanınca'),
+      h('button', { class: 'link-btn', type: 'button', onclick: openPayoff }, ch.salary || picked.length ? 'Değiştir' : 'Seç')));
+  if (!ch.salary && !picked.length) {
+    card.append(h('p', { class: 'empty-note' }, 'Tüm borcunu hangi paralarla ödeyeceğini seç; geriye ne kalacağını burada gör.'),
+      h('button', { class: 'btn soft', type: 'button', onclick: openPayoff }, 'Paraları seç'));
+    return card;
+  }
+  const rest = money0 - t.debts;
+  const parts = [];
+  if (ch.salary) parts.push(`Maaş ${money(salary)}`);
+  if (picked.length) parts.push(picked.length === 1 ? `${picked[0].title} ${money(assetValue(picked[0]))}` : `${picked.length} varlık ${money(sum(picked.map(assetValue)))}`);
+  card.append(
+    h('div', { class: 'pay-sum' },
+      h('div', { class: 'pay-big' + (rest < 0 ? ' neg' : '') }, money(rest)),
+      h('div', { class: 'pay-cap' }, rest < 0 ? 'eksik kalıyor' : 'kalır')),
+    h('p', { class: 'pay-cap payoff-f' }, `${parts.join(' + ')} − tüm borçlar ${money(t.debts)}`));
+  return card;
+}
+function openPayoff() {
+  const ch = payoffChoice();
+  const st = { salary: ch.salary, ids: new Set(ch.ids) };
+  const chip = (label, badge, on, toggle) => {
+    const b = h('button', { class: 'opt', type: 'button', role: 'checkbox', 'aria-checked': String(on()),
+      onclick: () => { toggle(); b.setAttribute('aria-checked', String(on())); } }, label, h('span', { class: 'badge' }, badge));
+    return b;
+  };
+  const chips = [];
+  if (S.data.income) chips.push(chip('Aylık maaş', '₺' + compact(S.data.income.amount), () => st.salary, () => { st.salary = !st.salary; }));
+  for (const a of S.data.assets.slice().sort(byAssetKind)) {
+    chips.push(chip(a.title, '₺' + compact(assetValue(a)), () => st.ids.has(a.id), () => { if (st.ids.has(a.id)) st.ids.delete(a.id); else st.ids.add(a.id); }));
+  }
+  openSheet('Hangi paralar sayılsın?', h('div', null,
+    h('p', { class: 'sheet-text' }, 'Seçtiklerinin toplamından tüm borçların düşülür; geriye kalan Özet’te görünür.'),
+    h('div', { class: 'field' }, h('div', { class: 'pick-list', role: 'group', 'aria-label': 'Sayılacak paralar' }, chips)),
+    h('div', { class: 'sheet-actions' },
+      h('button', { class: 'btn primary block', type: 'button', onclick: () => {
+        if (mutate(d => { d.payoff = { salary: st.salary, ids: [...st.ids] }; })) { closeSheet(); toast('Kaydedildi'); }
+      } }, 'Kaydet'))));
 }
 
 function welcomeCard() {
@@ -1653,6 +1713,7 @@ function assetSub(a) {
     return s === a.title ? '' : s;
   }
   // A bank account in foreign currency or gold says so; plain TL items need no sub-line under their group heading.
+  if (isSalaryLine(a)) return `maaş günü: ayın ${ordinal(S.data.income.day)}`;
   if (priced) return `${bankCur(a.unit).acc} · ${fmtQty(a.qty)} ${a.unit === 'GRA' ? 'gram' : fxOf(a.unit).sym}${missing}`;
   return '';
 }
@@ -2006,8 +2067,7 @@ function openChooser() {
       h('span', null, h('strong', null, 'Hedef ekle'), h('span', { class: 's' }, 'Ev, araba, tatil, acil durum fonu…')))));
 }
 
-// opts.after(item) runs once a new record is saved (used to return to the salary sheet).
-function openAsset(a, opts) {
+function openAsset(a) {
   const isNew = !a;
   const mode0 = a ? akind(a.kind).mode : 'tl';
   const st = {
@@ -2176,11 +2236,7 @@ function openAsset(a, opts) {
       createdAt: (a && a.createdAt) || now, updatedAt: now,
     };
     item.savedValue = Math.round(assetValue(item)) || (a && a.unit === unit ? a.savedValue : 0);
-    if (mutate(d => upsert(d.assets, item))) {
-      closeSheet();
-      toast(isNew ? 'Varlık eklendi' : 'Kaydedildi');
-      if (opts && opts.after) opts.after(item);
-    }
+    if (mutate(d => upsert(d.assets, item))) { closeSheet(); toast(isNew ? 'Varlık eklendi' : 'Kaydedildi'); }
   });
   layout();
   openSheet(isNew ? 'Yeni varlık' : 'Varlığı düzenle', form, title);
@@ -2341,34 +2397,17 @@ function openPayment(x) {
 }
 
 /* ---------- salary ---------- */
-// back: what was typed before stepping out to add a missing account, so nothing is lost on the way back.
-function openSalary(back) {
+// No bank to pick: on pay day the salary lands in a "Maaş" line of its own under Varlıklar.
+function openSalary() {
   const inc = S.data.income;
-  const p = back && back.fromAdd ? back : null;
-  const accounts = tlAccounts();
-  const st = { acc: p ? p.acc : inc ? inc.accountId || '' : accounts.length ? accounts[0].id : '' };
-  const amount = moneyInput('s-amount', p ? p.amount : inc ? inc.amount : null);
-  const day0 = p ? p.day : inc ? inc.day : 1;
+  const amount = moneyInput('s-amount', inc ? inc.amount : null);
   const day = h('select', { class: 'input', id: 's-day' },
-    Array.from({ length: 31 }, (_, i) => h('option', { value: i + 1, selected: day0 === i + 1 ? true : null }, `Ayın ${ordinal(i + 1)}`)));
+    Array.from({ length: 31 }, (_, i) => h('option', { value: i + 1, selected: (inc ? inc.day : 1) === i + 1 ? true : null }, `Ayın ${ordinal(i + 1)}`)));
   const err = h('div', { class: 'err', role: 'alert' });
-  // Only lira bank and cash accounts from Varlıklar can take the salary; a missing one can be added from here.
-  const addAccount = h('button', { class: 'link-btn add-acc', type: 'button', onclick: () => {
-    const typed = parseAmount(amount.input.value);
-    const keep = { fromAdd: true, amount: typed > 0 ? typed : null, day: Number(day.value), acc: st.acc };
-    openAsset(null, { after: item => openSalary({ ...keep, acc: item.unit === 'TRY' && (item.kind === 'banka' || item.kind === 'nakit') ? item.id : keep.acc }) });
-  } }, icon('plus'), 'Listede olmayan hesabı ekle');
   const form = h('form', { novalidate: true },
     field('Aylık maaşın (net)', amount.wrap, 's-amount'),
-    field('Maaş günü', h('div', { class: 'sel' }, day, icon('chev')), 's-day'),
-    h('div', { class: 'field' },
-      h('div', { class: 'lbl' }, 'Hangi hesaba yatıyor?'),
-      accounts.length ? chipGroup([...accounts.map(a => ({ id: a.id, label: a.title })), { id: '', label: 'Hesaba ekleme' }], st.acc,
-        v => { st.acc = v; }, 'Maaşın yattığı hesap') : null,
-      addAccount,
-      h('div', { class: 'hint' }, accounts.length
-        ? 'Listede Varlıklar’a eklediğin TL banka ve nakit hesapları var. Maaş gününde seçtiğin hesaba kendiliğinden eklenir; ay sonunda Güncelle ile gerçek bakiyeyi yaz.'
-        : 'Maaşının yattığı TL hesap henüz Varlıklar’da yok; yukarıdan ekleyebilirsin.')),
+    field('Maaş günü', h('div', { class: 'sel' }, day, icon('chev')), 's-day',
+      'Maaş gününde Varlıklar’daki “Maaş” satırına kendiliğinden eklenir; bir banka seçmen gerekmez. Borç ödemeleri de oradan düşer. Ay sonunda Güncelle ile kalanı düzeltebilirsin.'),
     err,
     h('div', { class: 'sheet-actions' },
       h('button', { class: 'btn primary block', type: 'submit' }, 'Kaydet'),
@@ -2382,22 +2421,29 @@ function openSalary(back) {
     const key = monthKey(now);
     // A pay day already past this month is taken as already in the balance; the first addition is next month.
     const past = now.getDate() >= Math.min(dd, daysIn(now.getFullYear(), now.getMonth()));
-    const next = { amount: round2(v), day: dd, accountId: st.acc || null, lastAdded: past ? key : (inc && inc.lastAdded === key ? key : null), addedAt: inc ? inc.addedAt : 0, undone: false };
+    const next = {
+      v: 2, amount: round2(v), day: dd, accountId: inc ? inc.accountId : null,
+      lastAdded: past ? key : (inc && inc.lastAdded === key ? key : null), addedAt: inc ? inc.addedAt : 0, undone: false,
+    };
     if (mutate(d => { d.income = next; })) { closeSheet(); toast('Maaş kaydedildi'); }
   });
   openSheet('Maaş', form, amount.input);
 }
 
-// On pay day the salary goes into its account once for the month.
+// On pay day the salary is added once for the month to its "Maaş" line, which is created the first time.
 function applySalary() {
   const inc = S.data && S.data.income;
-  if (!inc || !inc.accountId) return;
+  if (!inc) return;
   const now = new Date();
   const key = monthKey(now);
   if (inc.lastAdded === key || now.getDate() < Math.min(inc.day, daysIn(now.getFullYear(), now.getMonth()))) return;
-  if (!S.data.assets.some(a => a.id === inc.accountId && a.unit === 'TRY')) return;
   mutate(d => {
-    const a = d.assets.find(z => z.id === inc.accountId);
+    let a = d.assets.find(z => z.id === d.income.accountId && z.unit === 'TRY');
+    if (!a) {
+      a = { id: newId(), kind: 'banka', title: 'Maaş', unit: 'TRY', qty: 0, price: null, sub: null, code: null, codeName: null, savedValue: 0, createdAt: Date.now(), updatedAt: 0 };
+      d.assets.push(a);
+      d.income.accountId = a.id;
+    }
     a.qty = round2(a.qty + inc.amount);
     a.updatedAt = Date.now();
     d.income.lastAdded = key;
@@ -2405,12 +2451,13 @@ function applySalary() {
     d.income.undone = false;
   });
 }
+const isSalaryLine = a => !!(S.data.income && a.id === S.data.income.accountId);
 // The banner shows on the day the salary was added, with a way to take it back.
 function salaryNotice() {
   const inc = S.data.income;
   if (!inc || !inc.addedAt || inc.undone || isoDate(new Date(inc.addedAt)) !== isoDate(new Date())) return null;
   const a = S.data.assets.find(z => z.id === inc.accountId);
-  return a ? { text: `Maaş günü: ${money(inc.amount)} “${a.title}” hesabına eklendi.`, undo: undoSalary } : null;
+  return a ? { text: `Maaş günü: ${money(inc.amount)} Varlıklar’daki “${a.title}” satırına eklendi.`, undo: undoSalary } : null;
 }
 function undoSalary() {
   const inc = S.data.income;
@@ -2695,7 +2742,7 @@ function openSettings() {
 
 function backup() {
   const d = S.data;
-  const payload = { app: 'bilancom', v: 1, exportedAt: new Date().toISOString(), data: { assets: d.assets, debts: d.debts, goals: d.goals, income: d.income, history: d.history } };
+  const payload = { app: 'bilancom', v: 1, exportedAt: new Date().toISOString(), data: { assets: d.assets, debts: d.debts, goals: d.goals, income: d.income, payoff: d.payoff, history: d.history } };
   const name = `bilancom-yedek-${isoDate(new Date())}.json`;
   const text = JSON.stringify(payload, null, 2);
   const done = msg => {
